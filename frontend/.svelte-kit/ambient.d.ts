@@ -26,6 +26,7 @@
  * ```
  */
 declare module '$env/static/private' {
+	export const VITE_API_BASE_URL: string;
 	export const SHELL: string;
 	export const npm_command: string;
 	export const WINDOWID: string;
@@ -64,7 +65,6 @@ declare module '$env/static/private' {
 	export const LANG: string;
 	export const XDG_CURRENT_DESKTOP: string;
 	export const npm_package_version: string;
-	export const VIRTUAL_ENV: string;
 	export const STARSHIP_SHELL: string;
 	export const STARSHIP_CONFIG: string;
 	export const KITTY_WINDOW_ID: string;
@@ -87,7 +87,6 @@ declare module '$env/static/private' {
 	export const SHLVL: string;
 	export const XDG_VTNR: string;
 	export const XDG_SESSION_ID: string;
-	export const VIRTUAL_ENV_PROMPT: string;
 	export const npm_config_user_agent: string;
 	export const npm_execpath: string;
 	export const XDG_RUNTIME_DIR: string;
@@ -107,6 +106,7 @@ declare module '$env/static/private' {
 	export const MAIL: string;
 	export const KITTY_INSTALLATION_DIR: string;
 	export const npm_node_execpath: string;
+	export const npm_config_engine_strict: string;
 	export const OLDPWD: string;
 	export const NODE_ENV: string;
 }
@@ -140,6 +140,7 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		VITE_API_BASE_URL: string;
 		SHELL: string;
 		npm_command: string;
 		WINDOWID: string;
@@ -178,7 +179,6 @@ declare module '$env/dynamic/private' {
 		LANG: string;
 		XDG_CURRENT_DESKTOP: string;
 		npm_package_version: string;
-		VIRTUAL_ENV: string;
 		STARSHIP_SHELL: string;
 		STARSHIP_CONFIG: string;
 		KITTY_WINDOW_ID: string;
@@ -201,7 +201,6 @@ declare module '$env/dynamic/private' {
 		SHLVL: string;
 		XDG_VTNR: string;
 		XDG_SESSION_ID: string;
-		VIRTUAL_ENV_PROMPT: string;
 		npm_config_user_agent: string;
 		npm_execpath: string;
 		XDG_RUNTIME_DIR: string;
@@ -221,6 +220,7 @@ declare module '$env/dynamic/private' {
 		MAIL: string;
 		KITTY_INSTALLATION_DIR: string;
 		npm_node_execpath: string;
+		npm_config_engine_strict: string;
 		OLDPWD: string;
 		NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;

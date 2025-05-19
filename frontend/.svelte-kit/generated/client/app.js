@@ -15,11 +15,11 @@ export const nodes = [
 export const server_loads = [];
 
 export const dictionary = {
-		"/": [2],
-		"/adminhome": [3],
-		"/completeprofile": [4],
-		"/home": [5],
-		"/intro": [6],
+		"/adminhome": [2],
+		"/completeprofile": [3],
+		"/home": [4],
+		"/intro": [5],
+		"/profile": [6],
 		"/signin": [7],
 		"/signup": [8]
 	};

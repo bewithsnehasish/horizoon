@@ -1,8 +1,11 @@
+<!-- src/routes/intro/+page.svelte -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Motion } from 'svelte-motion';
 	import { ChevronRight, ChevronLeft } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { goto } from '$app/navigation'; // Import goto for client-side navigation
+	import { logout } from '$lib/stores/auth'; // Import authStore and logout
 
 	interface Screen {
 		id: number;
@@ -55,6 +58,10 @@
 	let currentScreen = screens[currentScreenIndex];
 
 	onMount(() => {
+		// Clear authentication state when landing on /intro
+		logout(); // This clears localStorage and authStore
+		console.log('Intro Page - Cleared authentication state');
+
 		if (showSplash) {
 			const timer = setTimeout(() => {
 				showSplash = false;
@@ -89,6 +96,11 @@
 		animationDirection = 'next';
 		currentScreenIndex = screens.length - 1;
 		updateScreen();
+	};
+
+	// Use goto for navigation to /login
+	const handleGetStarted = () => {
+		goto('/signup');
 	};
 
 	const getTransition = () => {
@@ -188,14 +200,21 @@
 							</Button>
 						</div>
 					{:else if currentScreen.type === 'welcome'}
-						<a href="/signin" class="w-full max-w-sm">
-							<Button size="lg" class="mb-4 w-full bg-blue-500 text-white hover:bg-blue-600">
-								Let's Get Started
-							</Button>
-						</a>
+						<Button
+							size="lg"
+							on:click={handleGetStarted}
+							class="mb-4 w-full max-w-sm bg-blue-500 text-white hover:bg-blue-600"
+						>
+							Let's Get Started
+						</Button>
 						<div class="flex items-center gap-2 text-sm">
 							<span class="text-gray-500">Already have an account?</span>
-							<a href="/signin" class="font-medium text-blue-500 hover:text-blue-600"> Sign In </a>
+							<button
+								on:click={handleGetStarted}
+								class="font-medium text-blue-500 hover:text-blue-600"
+							>
+								Sign In
+							</button>
 						</div>
 					{/if}
 				</div>

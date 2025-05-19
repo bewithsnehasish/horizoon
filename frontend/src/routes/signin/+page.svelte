@@ -2,7 +2,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { Eye, EyeOff } from 'lucide-svelte';
-	import { authStore, login } from '$lib/stores/auth';
+	import { login } from '$lib/stores/auth';
 
 	// Shadcn-svelte components
 	import { Button } from '$lib/components/ui/button';
@@ -20,38 +20,62 @@
 	let showPassword = false;
 	let loginEmail = '';
 	let loginPassword = '';
-	let mockRole = 'user'; // Toggle between 'user' and 'admin' for testing
+	let errorMessage = '';
+	let validationErrors: { [key: string]: string } = {};
+	let isLoading = false;
 
-	// Handle login form submission (mocked for development)
-	const handleLogin = async () => {
-		// Mock login: Simulate a successful login by setting authStore directly
-		const mockUser = {
-			token: 'mock-jwt-token',
-			role: mockRole, // Use the selected role for testing
-			email: loginEmail || 'mockuser@example.com'
-		};
+	// Validate form inputs
+	const validateForm = () => {
+		const errors: { [key: string]: string } = {};
 
-		// Update authStore directly (bypassing API call)
-		authStore.set(mockUser);
+		// Email validation
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!loginEmail || !emailRegex.test(loginEmail)) {
+			errors.email = 'Please enter a valid email address';
+		}
 
-		// Redirect to the appropriate page based on role
-		goto(mockRole === 'admin' ? '/adminhome' : '/home');
+		// Password validation
+		if (!loginPassword || loginPassword.length < 3) {
+			errors.password = 'Password must be at least 6 characters long';
+		}
+
+		validationErrors = errors;
+		return Object.keys(errors).length === 0;
 	};
 
-	// Optional: Use the real login function from authStore if not mocking
-	// const handleLogin = async () => {
-	// 	const result = await login(loginEmail, loginPassword);
-	// 	if (result.success) {
-	// 		goto($authStore?.role === 'admin' ? '/adminhome' : '/home');
-	// 	} else {
-	// 		alert(result.error || 'Login failed');
-	// 	}
-	// };
+	// Handle login form submission
+	const handleLogin = async () => {
+		// Clear previous errors
+		errorMessage = '';
+		validationErrors = {};
+
+		// Validate form
+		if (!validateForm()) {
+			return;
+		}
+
+		isLoading = true;
+		try {
+			const result = await login(loginEmail, loginPassword);
+			if (result.success) {
+				// Redirect based on role
+				const role = result.success ? (result.user_type === 'Client' ? 'user' : 'admin') : 'user';
+				goto(role === 'admin' ? '/adminhome' : '/home');
+			} else {
+				errorMessage = result.error || 'Login failed';
+			}
+		} catch (error) {
+			console.error('Login error:', error);
+			errorMessage = 'An error occurred. Please try again.';
+		} finally {
+			isLoading = false;
+		}
+	};
 
 	const backgroundImageUrl =
 		'https://images.unsplash.com/photo-1685729847171-7c7e631c2359?q=80&w=2126&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
-	// Social providers for "Sign In" - same as signup for consistency
+	// Social providers for "Sign In"
 	const socialProviders = [
 		{
 			label: 'Google',
@@ -97,9 +121,13 @@
 						id="login-email"
 						type="email"
 						bind:value={loginEmail}
-						placeholder="you@example.com"
+						placeholder="user@gmail.com"
+						required
 						class="mt-1 border-neutral-600 bg-neutral-800/50 text-white placeholder:text-neutral-400 focus:border-primary"
 					/>
+					{#if validationErrors.email}
+						<p class="mt-1 text-sm text-red-500">{validationErrors.email}</p>
+					{/if}
 				</div>
 				<div>
 					<Label for="login-password" class="font-semibold text-gray-200">Password</Label>
@@ -109,6 +137,7 @@
 							type={showPassword ? 'text' : 'password'}
 							bind:value={loginPassword}
 							placeholder="••••••••"
+							required
 							class="border-neutral-600 bg-neutral-800/50 text-white placeholder:text-neutral-400 focus:border-primary"
 						/>
 						<Button
@@ -126,34 +155,28 @@
 							{/if}
 						</Button>
 					</div>
+					{#if validationErrors.password}
+						<p class="mt-1 text-sm text-red-500">{validationErrors.password}</p>
+					{/if}
 					<div class="mt-2 text-right">
 						<a href="/forgot-password" class="text-xs font-medium text-primary hover:underline">
 							Forgot password?
 						</a>
 					</div>
 				</div>
-				<!-- Mock Role Toggle (for development) -->
-				<div class="flex justify-center space-x-4">
-					<button
-						type="button"
-						on:click={() => (mockRole = 'user')}
-						class={`rounded-md px-4 py-2 ${mockRole === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-200'}`}
-					>
-						User
-					</button>
-					<button
-						type="button"
-						on:click={() => (mockRole = 'admin')}
-						class={`rounded-md px-4 py-2 ${mockRole === 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-200'}`}
-					>
-						Admin
-					</button>
-				</div>
+				{#if errorMessage}
+					<p class="text-center text-sm text-red-500">{errorMessage}</p>
+				{/if}
 				<Button
 					type="submit"
+					disabled={isLoading}
 					class="!mt-6 w-full rounded-md bg-blue-600 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 				>
-					Login
+					{#if isLoading}
+						<span class="animate-pulse">Logging In...</span>
+					{:else}
+						Login
+					{/if}
 				</Button>
 			</form>
 

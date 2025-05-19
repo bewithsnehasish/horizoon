@@ -1,13 +1,9 @@
 {
 	"/": [
-		"src/routes/+layout.ts",
 		"src/routes/+layout.ts"
 	],
 	"/adminhome": [
 		"src/routes/+layout.ts"
-	],
-	"/api/login": [
-		"src/routes/api/login/+server.ts"
 	],
 	"/completeprofile": [
 		"src/routes/+layout.ts"
@@ -16,6 +12,9 @@
 		"src/routes/+layout.ts"
 	],
 	"/intro": [
+		"src/routes/+layout.ts"
+	],
+	"/profile": [
 		"src/routes/+layout.ts"
 	],
 	"/signin": [
