@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import status
 
 from .models import  Client, ClientDetails
-
+from backend.settings import GOOGLE_CLIENT_ID
 
 
 def create_client(username, email, password):
@@ -69,7 +69,7 @@ def google_login(request):
 
         # Verify Google ID token
         client_id = (
-            ""
+            GOOGLE_CLIENT_ID
         )
         idinfo = id_token.verify_oauth2_token(
             id_token_str, google_requests.Request(), client_id
@@ -84,7 +84,7 @@ def google_login(request):
                 email=email,
                 defaults={
                     "username": username,
-                    "password": "",  # Google users don’t need passwords
+                    "password": str(uuid.uuid4()),  # Google users don’t need passwords
                 },
             )
             if not created:
@@ -97,7 +97,6 @@ def google_login(request):
                 client.authToken = uuid.uuid4()
                 client.save()
         except IntegrityError as e:
-            logger.error(f"Database error: {str(e)}")
             return JsonResponse(
                 {"error": "Email or username already exists"}, status=409
             )
@@ -106,8 +105,7 @@ def google_login(request):
             "Google registration successful" if created else "Google login successful"
         )
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        logger.info(f"Google login success: email={email}, created={created}")
-
+        
         return JsonResponse(
             {
                 "token": str(client.authToken),
@@ -118,15 +116,12 @@ def google_login(request):
         )
 
     except json.JSONDecodeError as e:
-        logger.error(f"Invalid JSON: {str(e)}")
         return JsonResponse(
             {"error": "Invalid JSON format", "detail": str(e)}, status=400
         )
     except ValueError as e:
-        logger.error(f"Token verification failed: {str(e)}")
         return JsonResponse({"error": "Invalid ID token", "detail": str(e)}, status=400)
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         return JsonResponse(
             {"error": "Internal server error", "detail": str(e)}, status=500
         )
@@ -146,22 +141,7 @@ def login(request):
                     {"error": "Both identifier and password are required"}, status=400
                 )
 
-            try:
-                admin = Admin.objects.filter(
-                    username=identifier, password=password
-                ).first()
-                if admin:
-                    new_token = uuid.uuid4()
-                    admin.authToken = new_token
-                    admin.save()
-                    response_data = {
-                        "user_type": "Admin",
-                        "token": str(admin.authToken),
-                    }
-                    return JsonResponse(response_data)
-                # No admin found or invalid password; proceed to client/delivery boy
-            except Admin.DoesNotExist:
-                pass
+            
 
             # Check if identifier is an email (contains @) for Client
             if "@" in identifier:
@@ -185,28 +165,7 @@ def login(request):
                     return JsonResponse(
                         {"error": "No client found with this email"}, status=404
                     )
-            else:
-                # Try to authenticate as DeliveryBoy
-                try:
-                    delivery_boy = DeliveryBoy.objects.filter(
-                        username=identifier, password=password
-                    ).first()
-                    if delivery_boy:
-                        new_token = uuid.uuid4()
-                        delivery_boy.authToken = new_token
-                        delivery_boy.save()
-                        response_data = {
-                            "user_type": "DeliveryBoy",
-                            "token": str(delivery_boy.authToken),
-                        }
-                        return JsonResponse(response_data)
-                    else:
-                        return JsonResponse({"error": "Invalid password"}, status=401)
-                except Exception:
-                    return JsonResponse(
-                        {"error": "No delivery boy found with this username"},
-                        status=404,
-                    )
+            
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
