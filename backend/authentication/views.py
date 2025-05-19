@@ -2,15 +2,13 @@ import json
 import logging
 import uuid
 
-from django.contrib.auth.hashers import check_password
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from rest_framework.decorators import api_view
-from rest_framework.views import status  # Correct import for api_view
+from rest_framework.views import status
 
 from .models import Admin, Client, ClientDetails, DeliveryBoy
 
@@ -166,7 +164,7 @@ def login(request):
                     admin.save()
                     response_data = {
                         "user_type": "Admin",
-                        "data": str(admin.authToken),
+                        "token": str(admin.authToken),
                     }
                     return JsonResponse(response_data)
                 # No admin found or invalid password; proceed to client/delivery boy
@@ -186,7 +184,7 @@ def login(request):
                         client.save()
                         response_data = {
                             "user_type": "Client",
-                            "data": str(client.authToken),
+                            "token": str(client.authToken),
                         }
                         return JsonResponse(response_data)
                     else:
@@ -207,7 +205,7 @@ def login(request):
                         delivery_boy.save()
                         response_data = {
                             "user_type": "DeliveryBoy",
-                            "data": str(delivery_boy.authToken),
+                            "token": str(delivery_boy.authToken),
                         }
                         return JsonResponse(response_data)
                     else:
@@ -283,7 +281,6 @@ def add_client_details(request):
 
                 else:
                     try:
-
                         # Create or update client details
                         client_details = ClientDetails(
                             client=client, name=name, phone=phone, gender=gender

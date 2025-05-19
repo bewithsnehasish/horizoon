@@ -1,0 +1,2 @@
+[tool.pyright]
+reportArgumentType = "warning"  # Downgrade to warning instead of error

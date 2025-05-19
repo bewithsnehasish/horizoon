@@ -49,6 +49,9 @@ class ClientDetails(models.Model):
         ("Other", "Other"),
     )
     gender = models.CharField(max_length=100, choices=GENDER_CHOICES)
+    age = models.IntegerField(default=18)
+    aadhaar = models.CharField(max_length=100, validators=[aadhaar_regex], unique=True)
+    joinedAt = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __str__(self):
         return f"Name: {self.name} / Phone: {self.phone} / Gender: {self.gender}"
