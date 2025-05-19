@@ -9,7 +9,7 @@ from google.oauth2 import id_token
 from rest_framework.decorators import api_view
 from rest_framework.views import status
 
-from .models import  Client, ClientDetails
+from .models import  Client, ClientDetails, Renter
 from backend.settings import GOOGLE_CLIENT_ID
 
 
@@ -342,4 +342,39 @@ def get_client_details(request):
         except Exception as e:
             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+
+
+@csrf_exempt
+@api_view(["POST"])
+def get_renter_details(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            renter_id = data.get("renter_id")
+            
+            if not all([renter_id]):
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            try:
+                renter_obj = Renter.objects.filter(user_id=renter_id).first()
+            except:
+                return JsonResponse({"error": "Renter Not found"}, status=200)
+            
+            return JsonResponse(
+                {
+                    "full_name": renter_obj.full_name,
+                    "address": renter_obj.address,
+                    "profile_pic": renter_obj.profile_pic,
+                    "rating": renter_obj.rating,
+                    "status": renter_obj.verification_status
+                },
+                status=201,
+            )
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Method not allowed"}, status=405)

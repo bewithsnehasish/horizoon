@@ -25,8 +25,11 @@ ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
+    
     "corsheaders",
+    "business",
     "authentication",
+    'jazzmin',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -51,7 +54,7 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -120,11 +123,34 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Horizoon Wheels",
+    "site_header": "Horizoon Wheels",
+    "site_brand": "Horizoon Wheels",
+    "welcome_sign": "Welcome to the Horizoon Wheels Admin Panel",
+    "copyright": "Horizoon Wheels Pvt. Ltd.",
+    "search_model": ["authentication.Client", "authentication.Renter"],
+    "login_logo": None,
+    "login_logo_dark": None,
+    "site_icon": None,
+    # "topmenu_links": [
+    # {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+    # {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+    # {"model": "auth.User"},
+    # {"app": "books"},
+    # ],
+
+    # "language_chooser": True,
+}
+
+
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+
