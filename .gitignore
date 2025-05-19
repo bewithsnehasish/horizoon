@@ -1,5 +1,7 @@
 node_modules
 
+myenv
+
 # Output
 .output
 .vercel
@@ -21,3 +23,17 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+
+/myenv
+/website/db.sqlite3 
+/website/__pycache__
+/website/authentication/__pycache__ 
+/website/website/__pycache__
+/__pycache__/
+/website/authentication/migrations/__pycache__
+/website/.env
+/website/orders/__pycache__
+/website/shops/__pycache__
+/website/orders/migrations/__pycache__  
+/website/shops/migrations/__pycache__

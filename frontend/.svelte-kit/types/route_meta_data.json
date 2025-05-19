@@ -1,0 +1,28 @@
+{
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/adminhome": [
+		"src/routes/+layout.ts"
+	],
+	"/api/login": [
+		"src/routes/api/login/+server.ts"
+	],
+	"/completeprofile": [
+		"src/routes/+layout.ts"
+	],
+	"/home": [
+		"src/routes/+layout.ts"
+	],
+	"/intro": [
+		"src/routes/+layout.ts"
+	],
+	"/signin": [
+		"src/routes/+layout.ts"
+	],
+	"/signup": [
+		"src/routes/+layout.ts",
+		"src/routes/signup/+server.ts"
+	]
+}
