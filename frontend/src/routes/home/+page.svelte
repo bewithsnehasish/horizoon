@@ -1,33 +1,32 @@
+<!-- src/routes/completeprofile/+page.svelte -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { AvatarFallback, AvatarImage, Root } from '$lib/components/ui/avatar';
-	import Avatar from '$lib/components/ui/avatar/avatar.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
-	import Label from '$lib/components/ui/label/label.svelte';
-	import * as Select from '$lib/components/ui/select';
-	import { ArrowLeft, Pencil, UserCircle2 } from 'lucide-svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import {
+		Select,
+		SelectContent,
+		SelectGroup,
+		SelectItem,
+		SelectTrigger,
+		SelectValue
+	} from '$lib/components/ui/select';
+	import { ArrowLeft } from 'lucide-svelte';
+	import { getAuthToken } from '$lib/stores/auth';
 
-	// Shadcn UI imports
 	let name: string = '';
 	let phoneNumber: string = '';
-	let selectedCountryCode: string | undefined = '+91'; // Default country code, allow undefined for initial placeholder
 	let selectedGender: string | undefined = undefined;
-	let profilePictureUrl: string | null = null;
-	let fileInput: HTMLInputElement | null = null;
-
-	const countryCodes = [
-		{ value: '+91', label: '+91 (India)' },
-		{ value: '+1', label: '+1 (USA)' },
-		{ value: '+44', label: '+44 (UK)' }
-		// Add more as needed
-	];
+	let errorMessage: string = '';
+	let validationErrors: { [key: string]: string } = {};
+	let isLoading: boolean = false;
 
 	const genders = [
-		{ value: 'male', label: 'Male' },
-		{ value: 'female', label: 'Female' },
-		{ value: 'other', label: 'Other' },
-		{ value: 'prefer_not_to_say', label: 'Prefer not to say' }
+		{ value: 'Male', label: 'Male' },
+		{ value: 'Female', label: 'Female' },
+		{ value: 'Other', label: 'Other' },
+		{ value: 'Prefer not to say', label: 'Prefer not to say' }
 	];
 
 	function goBack() {
@@ -38,45 +37,87 @@
 		}
 	}
 
-	function triggerFileInput() {
-		fileInput?.click();
-	}
+	// Validate form inputs
+	const validateForm = () => {
+		const errors: { [key: string]: string } = {};
 
-	function handleProfilePictureChange(event: Event) {
-		const target = event.target as HTMLInputElement;
-		const file = target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				profilePictureUrl = e.target?.result as string;
-			};
-			reader.readAsDataURL(file);
+		// Name validation
+		if (!name || name.trim().length < 2) {
+			errors.name = 'Name must be at least 2 characters long';
 		}
-	}
+
+		// Phone number validation
+		const phoneRegex = /^[0-9]{10}$/;
+		if (!phoneNumber || !phoneRegex.test(phoneNumber)) {
+			errors.phone = 'Please enter a valid 10-digit phone number';
+		}
+
+		// Gender validation
+		if (!selectedGender) {
+			errors.gender = 'Please select your gender';
+		}
+
+		validationErrors = errors;
+		return Object.keys(errors).length === 0;
+	};
 
 	async function handleSubmitProfile() {
-		if (!name || !phoneNumber || !selectedGender) {
-			alert('Please fill in all required fields.');
+		// Clear previous errors
+		errorMessage = '';
+		validationErrors = {};
+
+		// Validate form
+		if (!validateForm()) {
 			return;
 		}
-		console.log('Submitting profile:', {
+
+		// Get auth token
+		const authToken = getAuthToken();
+		if (!authToken) {
+			errorMessage = 'Authentication token not found. Please log in again.';
+			goto('/login');
+			return;
+		}
+
+		// Prepare payload with just the phone number
+		const payload = {
+			authToken,
 			name,
-			countryCode: selectedCountryCode,
-			phoneNumber,
-			gender: selectedGender,
-			profilePicture: profilePictureUrl ? 'Image selected' : 'No image'
-		});
-		alert('Profile submitted (mock)!');
-		goto('/dashboard');
+			phone: phoneNumber, // Send only the phone number
+			gender: selectedGender
+		};
+
+		isLoading = true;
+		try {
+			const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+			const response = await fetch(`${API_BASE_URL}/authentication/add-details/`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				console.log('Profile submission successful:', data.message);
+				goto('/dashboard');
+			} else {
+				errorMessage = data.message || 'Failed to submit profile Please try again';
+			}
+		} catch (error) {
+			console.error('Profile submission error:', error);
+			errorMessage = 'An error occurred. Please try again.';
+		} finally {
+			isLoading = false;
+		}
 	}
-Select.
 </script>
 
 <svelte:head>
 	<title>Complete Your Profile</title>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col bg-white font-['Inter',sans-serif] text-gray-800">
+<div class="flex min-h-screen flex-col bg-white font-sans text-gray-800">
 	<header class="sticky top-0 z-10 bg-white px-4 pb-2 pt-4">
 		<Button
 			variant="ghost"
@@ -92,39 +133,12 @@ Select.
 	<main class="flex flex-grow flex-col items-center px-6 py-4">
 		<div class="w-full max-w-sm space-y-8">
 			<div>
-				<h1 class="text-center text-2xl font-semibold text-gray-900 md:text-3xl">
+				<h1 class="mt-16 text-center text-2xl font-semibold text-gray-900 md:text-3xl">
 					Complete Your Profile
 				</h1>
 				<p class="mt-2 text-center text-sm text-gray-500">
 					Don't worry, only you can see your personal data. No one else will be able to see it.
 				</p>
-			</div>
-
-			<div class="flex justify-center">
-				<div class="relative">
-					<Avatar class="h-32 w-32 border-2 border-gray-200">
-						<AvatarImage src={profilePictureUrl} alt="Profile picture" />
-						<AvatarFallback class="bg-gray-200">
-							<UserCircle2 class="h-20 w-20 text-gray-400" />
-						</AvatarFallback>
-					</Avatar>
-					<Button
-						variant="secondary"
-						size="icon"
-						class="absolute -bottom-1 -right-1 h-9 w-9 rounded-full bg-gray-700 text-white shadow-md hover:bg-gray-600"
-						on:click={triggerFileInput}
-						aria-label="Edit profile picture"
-					>
-						<Pencil class="h-4 w-4" />
-					</Button>
-					<input
-						type="file"
-						class="hidden"
-						accept="image/*"
-						bind:this={fileInput}
-						on:change={handleProfilePictureChange}
-					/>
-				</div>
 			</div>
 
 			<form on:submit|preventDefault={handleSubmitProfile} class="space-y-6">
@@ -138,58 +152,31 @@ Select.
 						class="focus:border-primary-500 border-gray-300 bg-gray-100 text-gray-800 placeholder-gray-400 focus:bg-white"
 						required
 					/>
+					{#if validationErrors.name}
+						<p class="mt-1 text-sm text-red-500">{validationErrors.name}</p>
+					{/if}
 				</div>
 
 				<div>
 					<Label for="phone" class="mb-1 block text-sm font-medium text-gray-700"
 						>Phone Number</Label
 					>
-					<div
-						class="focus-within:ring-primary-500 focus-within:border-primary-500 flex items-center space-x-0.5 rounded-md border border-gray-300 bg-gray-100 focus-within:bg-white focus-within:ring-1"
-					>
-						<Select.Root
-							value={selectedCountryCode}
-							onValueChange={(v) => {
-								selectedCountryCode = v;
-							}}
-						>
-							<Select.Trigger
-								aria-label="Country code"
-								class="w-[90px] rounded-l-md border-0 bg-transparent py-2.5 pl-3 pr-2 text-gray-700 focus:ring-0"
-							>
-								<Select.Value placeholder="Code" />
-							</Select.Trigger>
-							<Select.Content class="bg-white">
-								<Select.Group>
-									{#each countryCodes as code (code.value)}
-										<Select.Item value={code.value} class="text-gray-700"
-											>{code.label.split(' ')[0]}</Select.Item
-										>
-									{/each}
-								</Select.Group>
-							</Select.Content>
-						</Select.Root>
-						<div class="mx-1 h-6 border-l border-gray-300" />
-						<Input
-							id="phone"
-							type="tel"
-							bind:value={phoneNumber}
-							placeholder="Enter the Phone Number"
-							class="flex-1 rounded-r-md border-0 bg-transparent py-2.5 text-gray-800 placeholder-gray-400 focus:ring-0"
-							pattern="[0-9]*"
-							required
-						/>
-					</div>
+					<Input
+						id="phone"
+						type="number"
+						bind:value={phoneNumber}
+						placeholder="Enter the Phone Number"
+						class="focus:border-primary-500 border-gray-300 bg-gray-100 text-gray-800 placeholder-gray-400 focus:bg-white"
+						required
+					/>
+					{#if validationErrors.phone}
+						<p class="mt-1 text-sm text-red-500">{validationErrors.phone}</p>
+					{/if}
 				</div>
 
 				<div>
 					<Label for="gender" class="mb-1 block text-sm font-medium text-gray-700">Gender</Label>
-					<Select.Root
-						value={selectedGender}
-						onValueChange={(v) => {
-							selectedGender = v;
-						}}
-					>
+					<Select bind:selected={selectedGender}>
 						<SelectTrigger
 							id="gender"
 							class="focus:ring-primary-500 focus:border-primary-500 w-full border-gray-300 bg-gray-100 text-gray-800 placeholder-gray-400 focus:bg-white focus:ring-1"
@@ -203,35 +190,28 @@ Select.
 								{/each}
 							</SelectGroup>
 						</SelectContent>
-					</Select.Root>
+					</Select>
+					{#if validationErrors.gender}
+						<p class="mt-1 text-sm text-red-500">{validationErrors.gender}</p>
+					{/if}
 				</div>
+
+				{#if errorMessage}
+					<p class="text-center text-sm text-red-500">{errorMessage}</p>
+				{/if}
 
 				<Button
 					type="submit"
+					disabled={isLoading}
 					class="!mt-10 w-full rounded-xl bg-gray-600 py-3 text-base font-semibold text-white hover:bg-gray-700"
 				>
-					Complete Profile
+					{#if isLoading}
+						<span class="animate-pulse">Submitting...</span>
+					{:else}
+						Complete Profile
+					{/if}
 				</Button>
 			</form>
 		</div>
 	</main>
 </div>
-
-<style>
-	:global(
-		.font-\[\'Inter\'\,sans-serif\]
-			[data-state='closed']
-			[data-radix-select-trigger][role='combobox']
-			> span
-	) {
-		color: hsl(var(--foreground)) !important;
-	}
-	:global(
-		.font-\[\'Inter\'\,sans-serif\]
-			[data-state='open']
-			[data-radix-select-trigger][role='combobox']
-			> span
-	) {
-		color: hsl(var(--foreground)) !important;
-	}
-</style>

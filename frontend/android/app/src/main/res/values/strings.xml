@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Horizoon</string>
+    <string name="title_activity_main">Horizoon</string>
+    <string name="package_name">com.horizoon.app</string>
+    <string name="custom_url_scheme">com.horizoon.app</string>
+</resources>
