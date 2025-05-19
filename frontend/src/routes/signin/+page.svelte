@@ -22,7 +22,7 @@
 	let loginPassword = '';
 	let errorMessage = '';
 	let validationErrors: { [key: string]: string } = {};
-	let isLoading = false;
+	let isLoading = $state(false);
 
 	// Validate form inputs
 	const validateForm = () => {
