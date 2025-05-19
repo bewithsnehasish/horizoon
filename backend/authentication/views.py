@@ -1,5 +1,4 @@
 import json
-import logging
 import uuid
 
 from django.db import IntegrityError
@@ -10,9 +9,8 @@ from google.oauth2 import id_token
 from rest_framework.decorators import api_view
 from rest_framework.views import status
 
-from .models import Admin, Client, ClientDetails, DeliveryBoy
+from .models import  Client, ClientDetails
 
-logger = logging.getLogger(__name__)
 
 
 def create_client(username, email, password):
@@ -36,6 +34,7 @@ def register(request):
             username = data.get("username")
             email = data.get("email")
             password = data.get("password")
+            
             if not all([username, email, password]):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
@@ -59,31 +58,24 @@ def register(request):
 @api_view(["POST"])
 def google_login(request):
     try:
-        logger.info(f"Received Google login request: {request.body}")
         data = json.loads(request.body.decode("utf-8"))
+        
         id_token_str = data.get("id_token")
         username = data.get("username")
         email = data.get("email")
 
         if not all([id_token_str, username, email]):
-            logger.warning(
-                f"Missing fields: id_token={bool(id_token_str)}, username={bool(username)}, email={bool(email)}"
-            )
             return JsonResponse({"error": "Missing required fields"}, status=400)
 
         # Verify Google ID token
         client_id = (
-            "62675417390-k8b40o574v90esrt5erphd46g6e3jlbj.apps.googleusercontent.com"
+            ""
         )
         idinfo = id_token.verify_oauth2_token(
             id_token_str, google_requests.Request(), client_id
         )
-        logger.info(
-            f"Token verified: sub={idinfo.get('sub')}, email={idinfo.get('email')}"
-        )
 
         if idinfo["email"] != email:
-            logger.warning(f"Email mismatch: token={idinfo['email']}, provided={email}")
             return JsonResponse({"error": "Email does not match ID token"}, status=400)
 
         # Create or update client
@@ -382,69 +374,6 @@ def get_client_details(request):
                             "details": None,
                         },
                         "message": "Client exists but no details added yet",
-                    },
-                    status=200,
-                )
-
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON format"}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
-
-    return JsonResponse({"error": "Method not allowed"}, status=405)
-
-
-@api_view(["POST"])
-@csrf_exempt
-def get_delivery_boy_details(request):
-    if request.method == "POST":
-        try:
-            # Parse request body
-            data = json.loads(request.body.decode("utf-8"))
-
-            # Get auth token from request
-            auth_token = data.get("authToken")
-            if not auth_token:
-                return JsonResponse(
-                    {"error": "Authorization token is required"}, status=400
-                )
-
-            try:
-                # Find delivery boy by auth token
-                delivery_boy = DeliveryBoy.objects.get(authToken=auth_token)
-            except Exception:
-                return JsonResponse(
-                    {"error": "Invalid authentication token"}, status=401
-                )
-
-            try:
-                # Prepare response data
-                response_data = {
-                    "delivery_boy": {
-                        "username": delivery_boy.username,
-                        "name": delivery_boy.name,
-                        "phone": delivery_boy.phone,
-                        "marital_status": delivery_boy.marital_status,
-                        "age": delivery_boy.age,
-                        "aadhaar": delivery_boy.aadhaar,
-                        "joinedAt": delivery_boy.createdAt.isoformat(),
-                    },
-                }
-
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "data": response_data,
-                        "message": "Delivery boy details retrieved successfully",
-                    },
-                    status=200,
-                )
-
-            except Exception as e:
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": "Delivery Details not found",
                     },
                     status=200,
                 )
