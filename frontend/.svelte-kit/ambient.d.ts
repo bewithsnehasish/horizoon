@@ -30,12 +30,12 @@ declare module '$env/static/private' {
 	export const SHELL: string;
 	export const npm_command: string;
 	export const SESSION_MANAGER: string;
-	export const WINDOWID: string;
 	export const USER_ZDOTDIR: string;
 	export const QT_SCREEN_SCALE_FACTORS: string;
 	export const COLORTERM: string;
 	export const PYENV_SHELL: string;
 	export const XDG_CONFIG_DIRS: string;
+	export const VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
 	export const XDG_SESSION_PATH: string;
 	export const XDG_MENU_PREFIX: string;
 	export const TERM_PROGRAM_VERSION: string;
@@ -45,9 +45,9 @@ declare module '$env/static/private' {
 	export const KWIN_DRM_NO_AMS: string;
 	export const NODE: string;
 	export const MEMORY_PRESSURE_WRITE: string;
+	export const PYDEVD_DISABLE_FILE_VALIDATION: string;
 	export const npm_config_local_prefix: string;
 	export const DESKTOP_SESSION: string;
-	export const KITTY_PID: string;
 	export const GTK_RC_FILES: string;
 	export const NO_AT_BRIDGE: string;
 	export const PMSPEC: string;
@@ -59,9 +59,9 @@ declare module '$env/static/private' {
 	export const QT_QPA_PLATFORMTHEME: string;
 	export const XDG_SESSION_TYPE: string;
 	export const SYSTEMD_EXEC_PID: string;
+	export const BUNDLED_DEBUGPY_PATH: string;
 	export const _: string;
 	export const XAUTHORITY: string;
-	export const KITTY_PUBLIC_KEY: string;
 	export const VSCODE_GIT_ASKPASS_NODE: string;
 	export const MOTD_SHOWN: string;
 	export const VSCODE_INJECTION: string;
@@ -74,7 +74,6 @@ declare module '$env/static/private' {
 	export const MEMORY_PRESSURE_WATCH: string;
 	export const STARSHIP_SHELL: string;
 	export const STARSHIP_CONFIG: string;
-	export const KITTY_WINDOW_ID: string;
 	export const GIT_ASKPASS: string;
 	export const XDG_SEAT_PATH: string;
 	export const INVOCATION_ID: string;
@@ -88,7 +87,6 @@ declare module '$env/static/private' {
 	export const ZPFX: string;
 	export const XDG_SESSION_CLASS: string;
 	export const ANDROID_HOME: string;
-	export const TERMINFO: string;
 	export const TERM: string;
 	export const npm_package_name: string;
 	export const ZDOTDIR: string;
@@ -102,6 +100,7 @@ declare module '$env/static/private' {
 	export const SHLVL: string;
 	export const XDG_VTNR: string;
 	export const XDG_SESSION_ID: string;
+	export const VIRTUAL_ENV_PROMPT: string;
 	export const npm_config_user_agent: string;
 	export const npm_execpath: string;
 	export const XDG_RUNTIME_DIR: string;
@@ -121,7 +120,6 @@ declare module '$env/static/private' {
 	export const DBUS_SESSION_BUS_ADDRESS: string;
 	export const KDE_APPLICATIONS_AS_SCOPE: string;
 	export const MAIL: string;
-	export const KITTY_INSTALLATION_DIR: string;
 	export const npm_node_execpath: string;
 	export const OLDPWD: string;
 	export const TERM_PROGRAM: string;
@@ -161,12 +159,12 @@ declare module '$env/dynamic/private' {
 		SHELL: string;
 		npm_command: string;
 		SESSION_MANAGER: string;
-		WINDOWID: string;
 		USER_ZDOTDIR: string;
 		QT_SCREEN_SCALE_FACTORS: string;
 		COLORTERM: string;
 		PYENV_SHELL: string;
 		XDG_CONFIG_DIRS: string;
+		VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
 		XDG_SESSION_PATH: string;
 		XDG_MENU_PREFIX: string;
 		TERM_PROGRAM_VERSION: string;
@@ -176,9 +174,9 @@ declare module '$env/dynamic/private' {
 		KWIN_DRM_NO_AMS: string;
 		NODE: string;
 		MEMORY_PRESSURE_WRITE: string;
+		PYDEVD_DISABLE_FILE_VALIDATION: string;
 		npm_config_local_prefix: string;
 		DESKTOP_SESSION: string;
-		KITTY_PID: string;
 		GTK_RC_FILES: string;
 		NO_AT_BRIDGE: string;
 		PMSPEC: string;
@@ -190,9 +188,9 @@ declare module '$env/dynamic/private' {
 		QT_QPA_PLATFORMTHEME: string;
 		XDG_SESSION_TYPE: string;
 		SYSTEMD_EXEC_PID: string;
+		BUNDLED_DEBUGPY_PATH: string;
 		_: string;
 		XAUTHORITY: string;
-		KITTY_PUBLIC_KEY: string;
 		VSCODE_GIT_ASKPASS_NODE: string;
 		MOTD_SHOWN: string;
 		VSCODE_INJECTION: string;
@@ -205,7 +203,6 @@ declare module '$env/dynamic/private' {
 		MEMORY_PRESSURE_WATCH: string;
 		STARSHIP_SHELL: string;
 		STARSHIP_CONFIG: string;
-		KITTY_WINDOW_ID: string;
 		GIT_ASKPASS: string;
 		XDG_SEAT_PATH: string;
 		INVOCATION_ID: string;
@@ -219,7 +216,6 @@ declare module '$env/dynamic/private' {
 		ZPFX: string;
 		XDG_SESSION_CLASS: string;
 		ANDROID_HOME: string;
-		TERMINFO: string;
 		TERM: string;
 		npm_package_name: string;
 		ZDOTDIR: string;
@@ -233,6 +229,7 @@ declare module '$env/dynamic/private' {
 		SHLVL: string;
 		XDG_VTNR: string;
 		XDG_SESSION_ID: string;
+		VIRTUAL_ENV_PROMPT: string;
 		npm_config_user_agent: string;
 		npm_execpath: string;
 		XDG_RUNTIME_DIR: string;
@@ -252,7 +249,6 @@ declare module '$env/dynamic/private' {
 		DBUS_SESSION_BUS_ADDRESS: string;
 		KDE_APPLICATIONS_AS_SCOPE: string;
 		MAIL: string;
-		KITTY_INSTALLATION_DIR: string;
 		npm_node_execpath: string;
 		OLDPWD: string;
 		TERM_PROGRAM: string;

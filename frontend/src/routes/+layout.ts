@@ -4,39 +4,37 @@ import '../app.css';
 import { get } from 'svelte/store';
 import { redirect } from '@sveltejs/kit';
 
-export const load: LayoutLoad = async ({ url }) => {
-	
-	const initialUser =
-		typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('authUser') || 'null') : null;
-	authStore.set(initialUser);
+export const load: LayoutLoad = async ({ url, depends }) => {
+    // This ensures client-side only behavior
+    depends('app:auth');
+    
+    // Only run auth logic on client
+    if (typeof window === 'undefined') {
+        return {};
+    }
 
-	const user = get(authStore);
-	const isAuthenticated = !!user;
-	const isAdmin = user?.role === 'admin';
-	const path = url.pathname;
+    // Wait for store to sync with localStorage
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    const user = get(authStore);
+    const isAuthenticated = !!user;
+    const path = url.pathname;
 
-	// Debug: Log the user and authentication state
-	console.log('Layout Load - User:', user);
-	console.log('Layout Load - isAuthenticated:', isAuthenticated);
-	console.log('Layout Load - Path:', path);
+    console.log('Auth check - User:', user, 'Path:', path);
 
-	// Allow unauthenticated users to access /intro, /signin, and /signup
-	if (!isAuthenticated && !['/intro', '/signin', '/signup'].includes(path)) {
-		console.log('Redirecting unauthenticated user to /intro');
-		throw redirect(307, '/intro');
-	}
+    // Public routes that don't require auth
+    const publicRoutes = ['/intro', '/signin', '/signup'];
+    
+    if (!isAuthenticated && !publicRoutes.includes(path)) {
+        throw redirect(307, '/intro');
+    }
 
-	// Redirect authenticated users away from /intro, /signin, and /signup
-	if (isAuthenticated && ['/intro', '/signin', '/signup'].includes(path)) {
-		console.log('Redirecting authenticated user to home/adminhome');
-		throw redirect(307, user.role === 'admin' ? '/adminhome' : '/home');
-	}
+    if (isAuthenticated && publicRoutes.includes(path)) {
+        throw redirect(307, user?.role === 'admin' ? '/adminhome' : '/home');
+    }
 
-	// Protect routes that require authentication (e.g., /completeprofile)
-	if (!isAuthenticated && path === '/completeprofile') {
-		console.log('Redirecting unauthenticated user from /completeprofile to /intro');
-		throw redirect(307, '/intro');
-	}
-
-	return { user };
+    return { user };
 };
+
+export const ssr = false;  // Disable SSR for this layout
+export const csr = true;   // Ensure CSR is enabled

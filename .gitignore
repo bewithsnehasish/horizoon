@@ -27,14 +27,14 @@ vite.config.ts.timestamp-*
 
 
 /myenv
-/website/db.sqlite3 
-/website/__pycache__
-/website/authentication/__pycache__ 
-/website/website/__pycache__
+/backend/db.sqlite3 
+/backend/__pycache__
+/backend/authentication/__pycache__ 
+/backend/backend/__pycache__
 /__pycache__/
-/website/authentication/migrations/__pycache__
-/website/.env
-/website/orders/__pycache__
-/website/shops/__pycache__
-/website/orders/migrations/__pycache__  
-/website/shops/migrations/__pycache__
+/backend/authentication/migrations/__pycache__
+/backend/.env
+/backend/orders/__pycache__
+/backend/shops/__pycache__
+/backend/orders/migrations/__pycache__  
+/backend/shops/migrations/__pycache__
