@@ -1,8 +1,12 @@
 {
 	"/": [
+		"src/routes/+layout.ts",
 		"src/routes/+layout.ts"
 	],
-	"/adminhome": [
+	"/bookings": [
+		"src/routes/+layout.ts"
+	],
+	"/cars": [
 		"src/routes/+layout.ts"
 	],
 	"/completeprofile": [

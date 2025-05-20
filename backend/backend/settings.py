@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load .env
@@ -25,11 +26,10 @@ ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
-    
     "corsheaders",
     "business",
     "authentication",
-    'jazzmin',
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -54,7 +54,7 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates'],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -139,10 +139,8 @@ JAZZMIN_SETTINGS = {
     # {"model": "auth.User"},
     # {"app": "books"},
     # ],
-
     # "language_chooser": True,
 }
-
 
 
 CORS_ALLOWED_ORIGINS = [
@@ -150,7 +148,5 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-
-
