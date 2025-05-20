@@ -1,5 +1,5 @@
 from django.db import models
-from authentication.models import Renter
+from authentication.models import Renter, Client
 
 import uuid
 
@@ -70,56 +70,56 @@ class Vehicle(models.Model):
 
 
 
-# class Order(models.Model):
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Order(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-#     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='orders')
-#     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='orders')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='orders')
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='orders')
 
 
-#     # Rental timing
-#     pickup_datetime = models.DateTimeField()
-#     return_datetime = models.DateTimeField()
+    # Rental timing
+    pickup_datetime = models.DateTimeField()
+    return_datetime = models.DateTimeField()
 
-#     actual_return_datetime = models.DateTimeField(null=True, blank=True)  # if returned late
+    actual_return_datetime = models.DateTimeField(null=True, blank=True)  # if returned late
 
-#     pickup_location = models.TextField()
-#     dropoff_location = models.TextField()
+    pickup_location = models.TextField()
+    dropoff_location = models.TextField()
 
-#     rental_amount = models.DecimalField(max_digits=10, decimal_places=2)
-#     security_deposit = models.DecimalField(max_digits=10, decimal_places=2)
-#     late_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    rental_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    security_deposit = models.DecimalField(max_digits=10, decimal_places=2)
+    late_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
+    
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('paid', 'Paid'),
+            ('failed', 'Failed'),
+            ('refunded', 'Refunded')
+        ],
+        default='pending'
+    )
 
-#     payment_status = models.CharField(
-#         max_length=20,
-#         choices=[
-#             ('pending', 'Pending'),
-#             ('paid', 'Paid'),
-#             ('failed', 'Failed'),
-#             ('refunded', 'Refunded')
-#         ],
-#         default='pending'
-#     )
+    order_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('upcoming', 'Upcoming'),
+            ('ongoing', 'Ongoing'),
+            ('completed', 'Completed'),
+            ('cancelled', 'Cancelled')
+        ],
+        default='upcoming'
+    )
 
-#     order_status = models.CharField(
-#         max_length=20,
-#         choices=[
-#             ('upcoming', 'Upcoming'),
-#             ('ongoing', 'Ongoing'),
-#             ('completed', 'Completed'),
-#             ('cancelled', 'Cancelled')
-#         ],
-#         default='upcoming'
-#     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+    notes = models.TextField(blank=True)
 
-#     notes = models.TextField(blank=True)
+    def __str__(self):
+        return f"Order {self.id} | {self.client.username} -> {self.vehicle.name}"
 
-#     def __str__(self):
-#         return f"Order {self.id} | {self.client.username} -> {self.vehicle.name}"
-
-#     class Meta:
-#         ordering = ['-created_at']
+    class Meta:
+        ordering = ['-created_at']

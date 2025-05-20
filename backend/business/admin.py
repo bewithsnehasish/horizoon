@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Vehicle
+from .models import Vehicle, Order
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
@@ -52,5 +52,48 @@ class VehicleAdmin(admin.ModelAdmin):
         }),
         ('Location', {
             'fields': ('location',)
+        }),
+    )
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    search_fields = ['client__username', 'vehicle__vehicle_number']
+    list_filter = ['payment_status', 'order_status', 'pickup_datetime', 'return_datetime']
+    date_hierarchy = 'pickup_datetime'
+
+    list_display = [
+        'id',
+        'client',
+        'vehicle',
+        'pickup_datetime',
+        'return_datetime',
+        'order_status',
+        'payment_status',
+        'rental_amount',
+        'late_fee',
+        'created_at',
+    ]
+
+    readonly_fields = ['created_at', 'updated_at']
+
+    fieldsets = (
+        ('Client & Vehicle Info', {
+            'fields': ('client', 'vehicle'),
+        }),
+        ('Rental Timing', {
+            'fields': ('pickup_datetime', 'return_datetime', 'actual_return_datetime'),
+        }),
+        ('Location Details', {
+            'fields': ('pickup_location', 'dropoff_location'),
+        }),
+        ('Payment Info', {
+            'fields': ('rental_amount', 'security_deposit', 'late_fee', 'payment_status'),
+        }),
+        ('Status Tracking', {
+            'fields': ('order_status', 'notes'),
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
         }),
     )
