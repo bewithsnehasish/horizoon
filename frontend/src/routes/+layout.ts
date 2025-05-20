@@ -1,6 +1,7 @@
 import type { LayoutLoad } from './$types';
 import { authStore } from '$lib/stores/auth';
 
+export const prerender = true;
 export const load: LayoutLoad = async () => {
 	// Check localStorage directly for user data
 	let user: { email: string; role: string; token: string } | null = null;

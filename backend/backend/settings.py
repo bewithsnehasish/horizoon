@@ -143,9 +143,7 @@ JAZZMIN_SETTINGS = {
 }
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:4173"]
 CORS_ALLOW_CREDENTIALS = True
 
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
