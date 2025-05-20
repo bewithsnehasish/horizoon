@@ -29,6 +29,7 @@ declare module '$env/static/private' {
 	export const VITE_API_BASE_URL: string;
 	export const SHELL: string;
 	export const npm_command: string;
+<<<<<<< HEAD
 	export const SESSION_MANAGER: string;
 	export const USER_ZDOTDIR: string;
 	export const QT_SCREEN_SCALE_FACTORS: string;
@@ -36,65 +37,73 @@ declare module '$env/static/private' {
 	export const PYENV_SHELL: string;
 	export const XDG_CONFIG_DIRS: string;
 	export const VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
+=======
+	export const WINDOWID: string;
+	export const COLORTERM: string;
+	export const PYENV_SHELL: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 	export const XDG_SESSION_PATH: string;
-	export const XDG_MENU_PREFIX: string;
-	export const TERM_PROGRAM_VERSION: string;
-	export const CLUTTER_BACKEND: string;
+	export const NVIM: string;
 	export const ZSH_CACHE_DIR: string;
-	export const ICEAUTHORITY: string;
-	export const KWIN_DRM_NO_AMS: string;
+	export const I3SOCK: string;
 	export const NODE: string;
+<<<<<<< HEAD
 	export const MEMORY_PRESSURE_WRITE: string;
 	export const PYDEVD_DISABLE_FILE_VALIDATION: string;
+=======
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 	export const npm_config_local_prefix: string;
+	export const NVIM_LOG_FILE: string;
 	export const DESKTOP_SESSION: string;
+<<<<<<< HEAD
 	export const GTK_RC_FILES: string;
 	export const NO_AT_BRIDGE: string;
+=======
+	export const KITTY_PID: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 	export const PMSPEC: string;
+	export const MASON: string;
 	export const GTK_MODULES: string;
 	export const XDG_SEAT: string;
 	export const PWD: string;
-	export const XDG_SESSION_DESKTOP: string;
 	export const LOGNAME: string;
+	export const XDG_SESSION_DESKTOP: string;
 	export const QT_QPA_PLATFORMTHEME: string;
 	export const XDG_SESSION_TYPE: string;
+<<<<<<< HEAD
 	export const SYSTEMD_EXEC_PID: string;
 	export const BUNDLED_DEBUGPY_PATH: string;
 	export const _: string;
 	export const XAUTHORITY: string;
 	export const VSCODE_GIT_ASKPASS_NODE: string;
+=======
+	export const _: string;
+	export const XAUTHORITY: string;
+	export const DESKTOP_STARTUP_ID: string;
+	export const KITTY_PUBLIC_KEY: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 	export const MOTD_SHOWN: string;
-	export const VSCODE_INJECTION: string;
-	export const GTK2_RC_FILES: string;
 	export const HOME: string;
 	export const LANG: string;
 	export const XDG_CURRENT_DESKTOP: string;
 	export const npm_package_version: string;
-	export const VIRTUAL_ENV: string;
-	export const MEMORY_PRESSURE_WATCH: string;
 	export const STARSHIP_SHELL: string;
 	export const STARSHIP_CONFIG: string;
+<<<<<<< HEAD
 	export const GIT_ASKPASS: string;
+=======
+	export const KITTY_WINDOW_ID: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 	export const XDG_SEAT_PATH: string;
-	export const INVOCATION_ID: string;
-	export const MANAGERPID: string;
-	export const CHROME_DESKTOP: string;
 	export const STARSHIP_SESSION_KEY: string;
-	export const KDE_SESSION_UID: string;
 	export const npm_lifecycle_script: string;
 	export const NVM_DIR: string;
-	export const VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
 	export const ZPFX: string;
 	export const XDG_SESSION_CLASS: string;
 	export const ANDROID_HOME: string;
 	export const TERM: string;
 	export const npm_package_name: string;
-	export const ZDOTDIR: string;
 	export const USER: string;
-	export const VSCODE_GIT_IPC_HANDLE: string;
-	export const QT_WAYLAND_RECONNECT: string;
-	export const KDE_SESSION_VERSION: string;
-	export const PAM_KWALLET5_LOGIN: string;
 	export const DISPLAY: string;
 	export const npm_lifecycle_event: string;
 	export const SHLVL: string;
@@ -104,25 +113,18 @@ declare module '$env/static/private' {
 	export const npm_config_user_agent: string;
 	export const npm_execpath: string;
 	export const XDG_RUNTIME_DIR: string;
+	export const MYVIMRC: string;
 	export const PYENV_ROOT: string;
 	export const DEBUGINFOD_URLS: string;
 	export const npm_package_json: string;
 	export const BUN_INSTALL: string;
-	export const VSCODE_GIT_ASKPASS_MAIN: string;
-	export const QT_AUTO_SCREEN_SCALE_FACTOR: string;
-	export const JOURNAL_STREAM: string;
 	export const XDG_DATA_DIRS: string;
-	export const KDE_FULL_SESSION: string;
-	export const GDK_BACKEND: string;
 	export const CAPACITOR_ANDROID_STUDIO_PATH: string;
 	export const PATH: string;
-	export const ORIGINAL_XDG_CURRENT_DESKTOP: string;
 	export const DBUS_SESSION_BUS_ADDRESS: string;
-	export const KDE_APPLICATIONS_AS_SCOPE: string;
 	export const MAIL: string;
 	export const npm_node_execpath: string;
 	export const OLDPWD: string;
-	export const TERM_PROGRAM: string;
 	export const NODE_ENV: string;
 }
 
@@ -158,6 +160,7 @@ declare module '$env/dynamic/private' {
 		VITE_API_BASE_URL: string;
 		SHELL: string;
 		npm_command: string;
+<<<<<<< HEAD
 		SESSION_MANAGER: string;
 		USER_ZDOTDIR: string;
 		QT_SCREEN_SCALE_FACTORS: string;
@@ -165,65 +168,73 @@ declare module '$env/dynamic/private' {
 		PYENV_SHELL: string;
 		XDG_CONFIG_DIRS: string;
 		VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
+=======
+		WINDOWID: string;
+		COLORTERM: string;
+		PYENV_SHELL: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 		XDG_SESSION_PATH: string;
-		XDG_MENU_PREFIX: string;
-		TERM_PROGRAM_VERSION: string;
-		CLUTTER_BACKEND: string;
+		NVIM: string;
 		ZSH_CACHE_DIR: string;
-		ICEAUTHORITY: string;
-		KWIN_DRM_NO_AMS: string;
+		I3SOCK: string;
 		NODE: string;
+<<<<<<< HEAD
 		MEMORY_PRESSURE_WRITE: string;
 		PYDEVD_DISABLE_FILE_VALIDATION: string;
+=======
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 		npm_config_local_prefix: string;
+		NVIM_LOG_FILE: string;
 		DESKTOP_SESSION: string;
+<<<<<<< HEAD
 		GTK_RC_FILES: string;
 		NO_AT_BRIDGE: string;
+=======
+		KITTY_PID: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 		PMSPEC: string;
+		MASON: string;
 		GTK_MODULES: string;
 		XDG_SEAT: string;
 		PWD: string;
-		XDG_SESSION_DESKTOP: string;
 		LOGNAME: string;
+		XDG_SESSION_DESKTOP: string;
 		QT_QPA_PLATFORMTHEME: string;
 		XDG_SESSION_TYPE: string;
+<<<<<<< HEAD
 		SYSTEMD_EXEC_PID: string;
 		BUNDLED_DEBUGPY_PATH: string;
 		_: string;
 		XAUTHORITY: string;
 		VSCODE_GIT_ASKPASS_NODE: string;
+=======
+		_: string;
+		XAUTHORITY: string;
+		DESKTOP_STARTUP_ID: string;
+		KITTY_PUBLIC_KEY: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 		MOTD_SHOWN: string;
-		VSCODE_INJECTION: string;
-		GTK2_RC_FILES: string;
 		HOME: string;
 		LANG: string;
 		XDG_CURRENT_DESKTOP: string;
 		npm_package_version: string;
-		VIRTUAL_ENV: string;
-		MEMORY_PRESSURE_WATCH: string;
 		STARSHIP_SHELL: string;
 		STARSHIP_CONFIG: string;
+<<<<<<< HEAD
 		GIT_ASKPASS: string;
+=======
+		KITTY_WINDOW_ID: string;
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 		XDG_SEAT_PATH: string;
-		INVOCATION_ID: string;
-		MANAGERPID: string;
-		CHROME_DESKTOP: string;
 		STARSHIP_SESSION_KEY: string;
-		KDE_SESSION_UID: string;
 		npm_lifecycle_script: string;
 		NVM_DIR: string;
-		VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
 		ZPFX: string;
 		XDG_SESSION_CLASS: string;
 		ANDROID_HOME: string;
 		TERM: string;
 		npm_package_name: string;
-		ZDOTDIR: string;
 		USER: string;
-		VSCODE_GIT_IPC_HANDLE: string;
-		QT_WAYLAND_RECONNECT: string;
-		KDE_SESSION_VERSION: string;
-		PAM_KWALLET5_LOGIN: string;
 		DISPLAY: string;
 		npm_lifecycle_event: string;
 		SHLVL: string;
@@ -233,25 +244,18 @@ declare module '$env/dynamic/private' {
 		npm_config_user_agent: string;
 		npm_execpath: string;
 		XDG_RUNTIME_DIR: string;
+		MYVIMRC: string;
 		PYENV_ROOT: string;
 		DEBUGINFOD_URLS: string;
 		npm_package_json: string;
 		BUN_INSTALL: string;
-		VSCODE_GIT_ASKPASS_MAIN: string;
-		QT_AUTO_SCREEN_SCALE_FACTOR: string;
-		JOURNAL_STREAM: string;
 		XDG_DATA_DIRS: string;
-		KDE_FULL_SESSION: string;
-		GDK_BACKEND: string;
 		CAPACITOR_ANDROID_STUDIO_PATH: string;
 		PATH: string;
-		ORIGINAL_XDG_CURRENT_DESKTOP: string;
 		DBUS_SESSION_BUS_ADDRESS: string;
-		KDE_APPLICATIONS_AS_SCOPE: string;
 		MAIL: string;
 		npm_node_execpath: string;
 		OLDPWD: string;
-		TERM_PROGRAM: string;
 		NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;

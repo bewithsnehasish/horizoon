@@ -1,9 +1,7 @@
 import type { LayoutLoad } from './$types';
 import { authStore } from '$lib/stores/auth';
-import '../app.css';
-import { get } from 'svelte/store';
-import { redirect } from '@sveltejs/kit';
 
+<<<<<<< HEAD
 export const load: LayoutLoad = async ({ url, depends }) => {
     // This ensures client-side only behavior
     depends('app:auth');
@@ -34,6 +32,27 @@ export const load: LayoutLoad = async ({ url, depends }) => {
     }
 
     return { user };
+=======
+export const prerender = true;
+export const load: LayoutLoad = async () => {
+	// Check localStorage directly for user data
+	let user: { email: string; role: string; token: string } | null = null;
+	if (typeof window !== 'undefined') {
+		try {
+			const userData = localStorage.getItem('authUser');
+			if (userData) {
+				user = JSON.parse(userData);
+				user.role = 'user'; // Ensure role is "user"
+			}
+		} catch (e) {
+			console.error('Failed to parse user data', e);
+		}
+	}
+
+	authStore.set(user);
+
+	return { user };
+>>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 };
 
 export const ssr = false;  // Disable SSR for this layout

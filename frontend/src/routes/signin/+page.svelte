@@ -58,9 +58,7 @@
 		try {
 			const result = await login(loginEmail, loginPassword);
 			if (result.success) {
-				// Redirect based on role
-				const role = result.success ? (result.user_type === 'Client' ? 'user' : 'admin') : 'user';
-				goto(role === 'admin' ? '/adminhome' : '/home');
+				goto('/');
 			} else {
 				errorMessage = result.error || 'Login failed';
 			}
