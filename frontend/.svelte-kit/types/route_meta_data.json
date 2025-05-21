@@ -15,6 +15,9 @@
 	"/cars/popular": [
 		"src/routes/+layout.ts"
 	],
+	"/cars/[id]": [
+		"src/routes/+layout.ts"
+	],
 	"/completeprofile": [
 		"src/routes/+layout.ts"
 	],

@@ -1,0 +1,61 @@
+{
+	"vehicles": [
+		{
+			"id": "2adfde7275594684946ed5eb9d72cfbb",
+			"name": "Swift Dzire",
+			"brand": "Maruti Suzuki",
+			"vehicle_type": "Car",
+			"location": "Jalandhar",
+			"price_per_day": 1200.0,
+			"price_per_hour": 50.0,
+			"image_1": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//ZzGKbpEX/lIv7Nav0RhuyK/StW7wWxYo9ygnrQcE2V2Y2tPZUwzqD9OQqir1JJuR5Amupdj/AJOIsJ87O/fTne25V/hQb7dTv6bqvQFKDyiACwFhyr1SlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlB//2Q==",
+			"current_status": "available",
+			"rating": 2.4,
+			"seating_capacity": 5
+		},
+		{
+			"id": "48d7fcf64db04ad2b6a9cc8e1009b53f",
+			"name": "Activa 6G",
+			"brand": "Honda",
+			"vehicle_type": "Scooter",
+			"location": "Delhi",
+			"price_per_day": 400.0,
+			"price_per_hour": 20.0,
+			"image_1": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUT+3wzjxJaXDkRSH5l+63E6funU+HlrfEN4d38Tg2tNGynqLMvjYqSCPOvUWI2Ssn948jDpmKj2W1Iwbs4NDcYeO/VlDH3a9AeV8A2JcgQwSuf8A20kP/bVm2duJticj/pTGunekZVPoHJt7V6VjiVRZQAOgFq7oDPd090sdhohGsmHw6nVuzUyO5/eeR9WP5cqtmG2KR/eTyyHxNh7CpaigEI8Ii8B760sBX2igCiiigCiiigCiiigCiiigCiiigCiiigCiiigCiiigCiiigCiiigP/2Q==",
+			"current_status": "available",
+			"rating": 3.4,
+			"seating_capacity": 2
+		}
+	]
+},
+{
+    "vehicle": {
+        "id": "2adfde7275594684946ed5eb9d72cfbb",
+        "vehicle_number": "MH12AB1234",
+        "name": "Swift Dzire",
+        "brand": "Maruti Suzuki",
+        "model": "Dzire VXi",
+        "vehicle_type": "Car",
+        "transmission": "Manual",
+        "fuel_type": "Petrol",
+        "seating_capacity": 5,
+        "mileage": 21.0,
+        "engine_cc": 1197,
+        "color": "Silver",
+        "top_speed": 180,
+        "location": "Jalandhar",
+        "current_odometer": 25000.5,
+        "insurance_expiry_date": "2025-12-31",
+        "price_per_day": 1200.0,
+        "price_per_hour": 50.0,
+        "security_deposit": 5000.0,
+        "late_fee_per_hour": 100.0,
+        "image_1": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBxMSEhUSEhMVFRUXFxcXGBUWGRYVHhUYFRUWFxYVFxUYICggGBolHRUVITEiJSorLi4uFx8zODMsNygtLyvAJOIsJ87O/fTne25V/hQb7dTv6bqvQFKDyiACwFhyr1SlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlApSlB//2Q==",
+        "image_2": "url_or_base64_image_2",
+        "image_3": "url_or_base64_image_3",
+        "rating": 2.4,
+        "total_trips": 40,
+        "current_status": "available",
+        "owner_id": "9bd421017dbf4a5681ebcf8495bc1000"
+    }
+}

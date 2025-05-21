@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import axios from 'axios'; // Import Axios
 
 	// Lucide Icons
 	import {
@@ -10,13 +12,29 @@
 		Loader2,
 		AlertTriangle,
 		XCircle,
-		Car,
-		CarFront,
-		Zap,
-		Sparkles,
-		ChevronRight,
-		Ship
+		CalendarDays, // For Bookings (Bottom Nav)
+		Car, // General Car (Category)
+		CarFront, // For SUV type (Category)
+		Zap, // For Electric Cars (Category)
+		Sparkles, // For Luxury/Premium (Category & Rating)
+		Ship, // Logo
+		ChevronRight
 	} from 'lucide-svelte';
+
+	// Define the Vehicle interface based on API response
+	interface Vehicle {
+		id: string;
+		name: string;
+		brand: string;
+		vehicle_type: string;
+		location: string;
+		price_per_day: number;
+		price_per_hour: number;
+		image_1: string; // Base64 encoded image
+		current_status: string;
+		rating: number;
+		seating_capacity: number;
+	}
 
 	// Page State
 	let searchQuery = '';
@@ -24,83 +42,84 @@
 	let locationLoading = true;
 	let locationError: string | null = null;
 
+	let featuredCars: Vehicle[] = [];
+	let vehiclesLoading = true;
+	let vehiclesError: string | null = null;
+
+	const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 	const nominatimUserAgent = 'HorizoonCarRentalApp/1.0 (Svelte Edition)';
+	const vehiclesApiUrl = `${API_BASE_URL}/business/vehicles/`;
+	// const vehiclesApiUrl = 'http://0.0.0.0:8000/business/vehicles/'; // API URL
 
 	// Car Categories Data
 	const carCategories = [
 		{
-			name: 'Economy',
+			name: 'Car',
 			icon: Car,
 			color: 'text-sky-400',
 			bgColor: 'bg-sky-500/20',
-			action: () => goto('/cars/economy')
+			action: () => goto('/cars')
 		},
 		{
-			name: 'SUVs',
+			name: 'Bike',
 			icon: CarFront,
 			color: 'text-amber-400',
 			bgColor: 'bg-amber-500/20',
-			action: () => goto('/cars/suv')
+			action: () => goto('/cars')
 		},
 		{
 			name: 'Electric',
 			icon: Zap,
 			color: 'text-green-400',
 			bgColor: 'bg-green-500/20',
-			action: () => goto('/cars/electric')
+			action: () => goto('/cars')
 		},
 		{
-			name: 'Luxury',
+			name: 'Truck',
 			icon: Sparkles,
 			color: 'text-fuchsia-400',
 			bgColor: 'bg-fuchsia-500/20',
-			action: () => goto('/cars/luxury')
+			action: () => goto('/cars')
 		}
 	];
 
-	// Featured Cars (Placeholder data - replace with actual API data)
-	const featuredCars = [
-		{
-			name: 'Tesla Model S',
-			type: 'Electric Sedan',
-			pricePerDay: 120,
-			image:
-				'https://images.unsplash.com/photo-1617704548623-340376564e68?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-			rating: 4.8,
-			features: ['Autopilot', 'Panoramic Roof']
-		},
-		{
-			name: 'BMW X5',
-			type: 'Luxury SUV',
-			pricePerDay: 150,
-			image:
-				'https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Ym13fGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
-			rating: 4.9,
-			features: ['Heated Seats', 'Spacious']
-		},
-		{
-			name: 'Toyota Camry',
-			type: 'Standard Sedan',
-			pricePerDay: 70,
-			image:
-				'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8VG95b3RhJTIwQ2Ftcnl8ZW58MHx8MHx8fDA%3D',
-			rating: 4.6,
-			features: ['Reliable', 'Fuel Efficient']
-		}
+	// Bottom Navigation Data
+	const navItems = [
+		{ icon: Search, label: 'Explore', href: '/' }, // Adjusted Home to Explore with /
+		{ icon: Car, label: 'Rides', href: '/cars' },
+		{ icon: CalendarDays, label: 'Bookings', href: '/bookings' },
+		{ icon: User, label: 'Profile', href: '/profile' }
 	];
+
+	async function fetchFeaturedCars() {
+		vehiclesLoading = true;
+		vehiclesError = null;
+		try {
+			const response = await axios.get(vehiclesApiUrl);
+			if (response.data && response.data.vehicles) {
+				featuredCars = response.data.vehicles;
+			} else {
+				featuredCars = []; // Or handle as error
+				vehiclesError = 'Unexpected API response format.';
+			}
+		} catch (error) {
+			console.error('Error fetching featured cars:', error);
+			vehiclesError = 'Could not load featured cars. Please try again later.';
+			featuredCars = []; // Set to empty on error
+		} finally {
+			vehiclesLoading = false;
+		}
+	}
 
 	onMount(() => {
-		// --- Geolocation & Reverse Geocoding ---
 		const fetchCurrentLocation = async () => {
 			if (!navigator.geolocation) {
 				locationError = 'Location services not supported.';
 				locationLoading = false;
 				return;
 			}
-
 			locationLoading = true;
 			locationError = null;
-
 			navigator.geolocation.getCurrentPosition(
 				async (position) => {
 					const { latitude, longitude } = position.coords;
@@ -109,12 +128,8 @@
 							`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=16&addressdetails=1`,
 							{ headers: { 'User-Agent': nominatimUserAgent } }
 						);
-
-						if (!geoResponse.ok) {
-							throw new Error(`Geocoding failed: ${geoResponse.status}`);
-						}
+						if (!geoResponse.ok) throw new Error(`Geocoding failed: ${geoResponse.status}`);
 						const geoData = await geoResponse.json();
-
 						if (geoData && geoData.display_name) {
 							currentUserLocation = geoData.display_name;
 						} else if (geoData && geoData.address) {
@@ -162,6 +177,7 @@
 		};
 
 		fetchCurrentLocation();
+		fetchFeaturedCars();
 	});
 </script>
 
@@ -177,7 +193,6 @@
 					Horiz<span class="text-teal-400">oo</span>n
 				</h1>
 			</a>
-			<!-- User Avatar or Login Icon Placeholder -->
 			<button
 				on:click={() => goto('/profile')}
 				class="rounded-full p-2 transition-colors hover:bg-slate-700/50"
@@ -293,55 +308,129 @@
 				/>
 			</a>
 		</div>
-		<div class="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-			{#each featuredCars as car (car.name)}
-				<div
-					on:click={() => goto(`/cars/${car.name.toLowerCase().replace(/\s+/g, '-')}`)}
-					class="group cursor-pointer overflow-hidden rounded-2xl bg-slate-800/70 shadow-lg transition-all duration-300 ease-out hover:bg-slate-800 hover:shadow-xl hover:ring-2 hover:ring-teal-500/30"
+
+		{#if vehiclesLoading}
+			<div class="flex h-64 items-center justify-center">
+				<Loader2 class="h-12 w-12 animate-spin text-teal-400" />
+				<p class="ml-3 text-lg text-slate-400">Loading amazing rides...</p>
+			</div>
+		{:else if vehiclesError}
+			<div
+				class="flex h-64 flex-col items-center justify-center rounded-lg bg-slate-800/50 p-6 text-center"
+			>
+				<AlertTriangle class="mb-4 h-12 w-12 text-red-400" />
+				<p class="mb-2 text-lg text-red-300">Oops! Something went wrong.</p>
+				<p class="mb-4 text-sm text-slate-400">{vehiclesError}</p>
+				<button
+					on:click={fetchFeaturedCars}
+					class="rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-500"
 				>
-					<div class="relative h-48 sm:h-56">
-						<img
-							src={car.image}
-							alt={car.name}
-							class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-						/>
-						<div
-							class="absolute right-3 top-3 flex items-center rounded-full bg-slate-900/70 px-2.5 py-1 text-xs font-semibold text-yellow-400 backdrop-blur-sm"
-						>
-							<Sparkles class="mr-1 h-3.5 w-3.5 text-yellow-500" />
-							{car.rating}
-						</div>
-					</div>
-					<div class="p-5">
-						<h3
-							class="mb-1 text-xl font-semibold text-gray-100 transition-colors group-hover:text-teal-400"
-						>
-							{car.name}
-						</h3>
-						<p class="mb-3 text-sm text-slate-400">{car.type}</p>
-						<div class="flex items-center justify-between">
-							<p class="text-xl font-bold text-teal-400">
-								${car.pricePerDay}<span class="text-xs font-medium text-slate-400">/day</span>
-							</p>
-							<button
-								class="rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-500"
+					Try Again
+				</button>
+			</div>
+		{:else if featuredCars.length > 0}
+			<div class="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+				{#each featuredCars as car (car.id)}
+					<div
+						on:click={() => goto(`/cars/${car.id}`)}
+						class="group cursor-pointer overflow-hidden rounded-2xl bg-slate-800/70 shadow-lg transition-all duration-300 ease-out hover:bg-slate-800 hover:shadow-xl hover:ring-2 hover:ring-teal-500/30"
+					>
+						<div class="relative h-48 sm:h-56">
+							<img
+								src={car.image_1}
+								alt="{car.brand} {car.name}"
+								class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+							/>
+							<div
+								class="absolute right-3 top-3 flex items-center rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-semibold text-yellow-400 backdrop-blur-sm"
 							>
-								Book Now
-							</button>
+								<Sparkles class="mr-1 h-3.5 w-3.5 text-yellow-500" />
+								{car.rating.toFixed(1)}
+							</div>
+							{#if car.current_status === 'available'}
+								<span
+									class="absolute left-3 top-3 rounded-full bg-green-500/80 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm"
+								>
+									Available
+								</span>
+							{:else}
+								<span
+									class="absolute left-3 top-3 rounded-full bg-yellow-600/80 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm"
+								>
+									On Request
+								</span>
+							{/if}
+						</div>
+						<div class="p-5">
+							<h3
+								class="mb-1 truncate text-xl font-semibold text-gray-100 transition-colors group-hover:text-teal-400"
+							>
+								{car.brand}
+								{car.name}
+							</h3>
+							<p class="mb-1 text-sm text-slate-400">{car.vehicle_type}</p>
+							<p class="mb-3 text-xs text-slate-500">
+								<MapPin class="mr-1 inline h-3 w-3" />{car.location}
+							</p>
+							<div class="flex items-center justify-between">
+								<p class="text-xl font-bold text-teal-400">
+									₹{car.price_per_day.toLocaleString()}<span
+										class="text-xs font-medium text-slate-400">/day</span
+									>
+								</p>
+								<button
+									class="rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-slate-800"
+								>
+									Book Now
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
-			{/each}
-		</div>
+				{/each}
+			</div>
+		{:else}
+			<div
+				class="flex h-64 flex-col items-center justify-center rounded-lg bg-slate-800/50 p-6 text-center"
+			>
+				<Car class="mb-4 h-12 w-12 text-slate-500" />
+				<p class="text-lg text-slate-400">No cars available at the moment.</p>
+				<p class="text-sm text-slate-500">Please check back later!</p>
+			</div>
+		{/if}
 	</section>
+
+	<!-- Bottom Navigation -->
+	<nav
+		class="fixed bottom-0 left-0 right-0 z-30 flex w-full items-center justify-around rounded-t-2xl border-t border-slate-700/50 bg-slate-900/80 px-4 py-3 shadow-2xl backdrop-blur-lg"
+	>
+		{#each navItems as item (item.label)}
+			{@const isActive =
+				$page.url.pathname === item.href ||
+				($page.url.pathname.startsWith(item.href) && item.href !== '/')}
+			<a
+				href={item.href}
+				class="flex min-w-[60px] flex-col items-center rounded-lg p-2 transition-colors duration-200
+					   {isActive ? 'text-teal-400' : 'text-slate-400 hover:text-slate-200'}"
+				aria-label={item.label}
+			>
+				<div
+					class="mb-0.5 rounded-full p-2 transition-all duration-200
+						   {isActive
+						? 'scale-110 bg-teal-500/10 shadow-md shadow-teal-500/30'
+						: 'group-hover:bg-slate-700/50'}"
+				>
+					<svelte:component this={item.icon} class="h-6 w-6" />
+				</div>
+				<span class="text-xs font-medium">{item.label}</span>
+			</a>
+		{/each}
+	</nav>
 </div>
 
 <style>
 	:global(.font-quicksand) {
 		font-family: 'Quicksand', sans-serif;
 	}
-	/* :global(.backdrop-blur-lg) has been applied via Tailwind utility class for this */
-
 	.shadow-text {
 		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 	}

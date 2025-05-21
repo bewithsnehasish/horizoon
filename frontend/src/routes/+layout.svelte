@@ -12,32 +12,6 @@
 
 <!-- src/routes/+layout.svelte -->
 <script lang="ts">
-<<<<<<< HEAD
-    import '../app.css';
-    import { authStore } from '$lib/stores/auth';
-    import { onMount } from 'svelte';
-
-    // Optional: Add a loading state
-    let loading = true;
-    
-    onMount(() => {
-        loading = false;
-    });
-</script>
-
-{#if loading}
-    <div class="min-h-screen bg-black flex items-center justify-center">
-        Loading...
-    </div>
-{:else}
-    <div class="min-h-screen bg-black">
-        {#if $authStore}{/if}
-        <main class="mx-auto">
-            <slot />
-        </main>
-    </div>
-{/if}
-=======
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -136,4 +110,3 @@
 		font-family: 'Quicksand', sans-serif;
 	}
 </style>
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051

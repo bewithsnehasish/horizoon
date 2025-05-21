@@ -1,7 +1,8 @@
-<!-- src/routes/cars/+page.svelte -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import axios from 'axios';
 
 	// Lucide Icons
 	import {
@@ -13,237 +14,199 @@
 		Zap,
 		ChevronLeft,
 		ChevronRight,
-		FilterX
+		FilterX,
+		Check,
+		X,
+		Car,
+		CarFront,
+		Sparkles
 	} from 'lucide-svelte';
+	import { Loader2 } from 'lucide-svelte';
 
-	// Car Interface
-	interface Car {
+	// Interface based on API response and backend choices
+	interface Vehicle {
 		id: string;
 		name: string;
 		brand: string;
-		type: 'Sedan' | 'SUV' | 'Electric' | 'Luxury' | 'Hatchback' | 'Convertible';
-		pricePerDay: number;
-		image: string;
+		vehicle_type: 'Car' | 'Bike' | 'SUV' | 'Scooter' | 'Truck' | 'Other';
+		location: string;
+		price_per_day: number;
+		price_per_hour: number;
+		image_1: string;
+		current_status: string;
 		rating: number;
-		seats: number;
-		fuelType: 'Petrol' | 'Diesel' | 'Electric' | 'Hybrid';
-		range?: number;
-		location?: string;
-		features: string[];
-		colorsAvailable: string[];
+		seating_capacity: number;
+		transmission?: 'Manual' | 'Automatic';
+		fuel_type?: 'Petrol' | 'Diesel' | 'Electric' | 'CNG';
 	}
 
-	// Mock Car Data (Replace with API call in a real app)
-	const mockCars: Car[] = [
-		{
-			id: 'tesla-model-3',
-			name: 'Tesla Model 3',
-			brand: 'Tesla',
-			type: 'Electric',
-			pricePerDay: 95,
-			image:
-				'https://images.unsplash.com/photo-1610470832703-95d40c3fad55?w=500&auto=format&fit=crop&q=60',
-			rating: 4.9,
-			seats: 5,
-			fuelType: 'Electric',
-			range: 350,
-			location: 'San Francisco, CA',
-			features: ['Autopilot', 'Panoramic Roof', 'Premium Audio'],
-			colorsAvailable: ['#DB2777', '#14B8A6', '#EFF6FF']
-		},
-		{
-			id: 'bmw-x7',
-			name: 'BMW X7',
-			brand: 'BMW',
-			type: 'SUV',
-			pricePerDay: 180,
-			image:
-				'https://images.unsplash.com/photo-1603764365431-483436562596?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70',
-			rating: 4.8,
-			seats: 7,
-			fuelType: 'Petrol',
-			location: 'New York, NY',
-			features: ['Heated Seats', 'Sunroof', 'Parking Assist'],
-			colorsAvailable: ['#1E293B', '#F1F5F9', '#0EA5E9']
-		},
-		{
-			id: 'audi-a6',
-			name: 'Audi A6',
-			brand: 'Audi',
-			type: 'Sedan',
-			pricePerDay: 110,
-			image:
-				'https://images.unsplash.com/photo-1616422285623-13ff0162193c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70',
-			rating: 4.7,
-			seats: 5,
-			fuelType: 'Diesel',
-			features: ['Virtual Cockpit', 'Ambient Lighting', 'Leather Seats'],
-			colorsAvailable: ['#64748B', '#334155', '#DC2626']
-		},
-		{
-			id: 'mercedes-c-class',
-			name: 'Mercedes C-Class',
-			brand: 'Mercedes-Benz',
-			type: 'Luxury',
-			pricePerDay: 130,
-			image:
-				'https://images.unsplash.com/photo-1587050106610-185f45BOLz-c-A?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70',
-			rating: 4.8,
-			seats: 5,
-			fuelType: 'Petrol',
-			features: ['Burmester Sound', 'Adaptive Cruise', 'MBUX System'],
-			colorsAvailable: ['#A1A1AA', '#111827', '#FDE68A']
-		},
-		{
-			id: 'ford-mustang',
-			name: 'Ford Mustang GT',
-			brand: 'Ford',
-			type: 'Convertible',
-			pricePerDay: 150,
-			image:
-				'https://images.unsplash.com/photo-1549927681-f2a408912ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70',
-			rating: 4.6,
-			seats: 4,
-			fuelType: 'Petrol',
-			features: ['V8 Engine', 'Performance Pack', 'Convertible Top'],
-			colorsAvailable: ['#FACC15', '#1D4ED8', '#4B5563']
-		},
-		{
-			id: 'toyota-rav4',
-			name: 'Toyota RAV4 Hybrid',
-			brand: 'Toyota',
-			type: 'SUV',
-			pricePerDay: 85,
-			image:
-				'https://images.unsplash.com/photo-1618434499042-669eadf8df98?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70',
-			rating: 4.5,
-			seats: 5,
-			fuelType: 'Hybrid',
-			range: 580,
-			features: ['Fuel Efficient', 'AWD', 'Toyota Safety Sense'],
-			colorsAvailable: ['#047857', '#6B7280', '#D1D5DB']
-		},
-		{
-			id: 'honda-civic',
-			name: 'Honda Civic Type R',
-			brand: 'Honda',
-			type: 'Hatchback',
-			pricePerDay: 90,
-			image:
-				'https://images.unsplash.com/photo-1620760452567-cd3dec70fcc3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70',
-			rating: 4.7,
-			seats: 4,
-			fuelType: 'Petrol',
-			features: ['Sporty Design', 'Manual Transmission', 'Great Handling'],
-			colorsAvailable: ['#DC2626', '#F8FAFC', '#0F172A']
-		},
-		{
-			id: 'porsche-911',
-			name: 'Porsche 911 Carrera',
-			brand: 'Porsche',
-			type: 'Luxury',
-			pricePerDay: 250,
-			image:
-				'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=70',
-			rating: 4.9,
-			seats: 4,
-			fuelType: 'Petrol',
-			features: ['Iconic Design', 'Performance', 'PDK Transmission'],
-			colorsAvailable: ['#EAB308', '#020617', '#78716C']
-		}
-	];
+	const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+	const vehiclesApiUrl = `${API_BASE_URL}/business/vehicles/`;
 
-	// State for search, filters, sorting, and pagination
+	// State variables
+	let allVehicles: Vehicle[] = [];
+	let vehiclesLoading = true;
+	let vehiclesError: string | null = null;
 	let searchTerm = '';
 	let showFiltersPanel = false;
 	let sortBy = 'rating';
-	let priceRange = 300; // Max price filter (default to max price in dataset)
-	let carTypeFilter: string = 'All'; // Car type filter
 	let currentPage = 1;
 	const carsPerPage = 8;
 
-	// Compute max price for the range slider
-	const maxPrice = Math.max(...mockCars.map((car) => car.pricePerDay));
+	// Filter states
+	let selectedVehicleTypes: string[] = [];
+	let selectedFuelTypes: string[] = [];
+	let selectedTransmissions: string[] = [];
+	let priceRange = 5000;
+	let maxPriceFound = 5000;
 
-	// Reset priceRange to maxPrice on mount
+	// Filter options from backend
+	const vehicleTypeChoices = ['Car', 'Bike', 'SUV', 'Scooter', 'Truck', 'Other'];
+	const fuelTypeChoices = ['Petrol', 'Diesel', 'Electric', 'CNG'];
+	const transmissionChoices = ['Manual', 'Automatic'];
+
+	// Vehicle type to category mapping for icons and colors
+	const vehicleTypeStyles = {
+		Car: { icon: Car, color: 'text-sky-400', bgColor: 'bg-sky-500/20' },
+		SUV: { icon: CarFront, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+		Bike: { icon: Car, color: 'text-sky-400', bgColor: 'bg-sky-500/20' }, // Using Car as placeholder
+		Scooter: { icon: Car, color: 'text-sky-400', bgColor: 'bg-sky-500/20' }, // Using Car as placeholder
+		Truck: { icon: Car, color: 'text-sky-400', bgColor: 'bg-sky-500/20' }, // Using Car as placeholder
+		Other: { icon: Car, color: 'text-sky-400', bgColor: 'bg-sky-500/20' } // Using Car as placeholder
+	};
+
+	async function fetchAllVehicles() {
+		vehiclesLoading = true;
+		vehiclesError = null;
+		try {
+			const response = await axios.get(vehiclesApiUrl);
+			if (response.data && response.data.vehicles && Array.isArray(response.data.vehicles)) {
+				allVehicles = response.data.vehicles;
+				if (allVehicles.length > 0) {
+					maxPriceFound = Math.max(...allVehicles.map((v) => v.price_per_day), 0) || 5000;
+					priceRange = maxPriceFound;
+				}
+			} else {
+				allVehicles = [];
+				vehiclesError = 'Unexpected API response format for vehicles.';
+			}
+		} catch (error) {
+			console.error('Error fetching vehicles:', error);
+			vehiclesError = 'Could not load vehicles. Please try again later.';
+			allVehicles = [];
+		} finally {
+			vehiclesLoading = false;
+		}
+	}
+
 	onMount(() => {
-		priceRange = maxPrice;
+		fetchAllVehicles();
+		const queryParams = new URLSearchParams($page.url.search);
+		searchTerm = queryParams.get('q') || '';
 	});
 
-	// Reactive filtered and sorted cars
-	$: filteredCars = mockCars
-		.filter((car) => {
-			// Search filter
+	// Reactive filtered and sorted vehicles
+	$: filteredAndSortedVehicles = allVehicles
+		.filter((vehicle) => {
+			const searchTermLower = searchTerm.toLowerCase();
 			const matchesSearch =
-				car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				car.type.toLowerCase().includes(searchTerm.toLowerCase());
+				vehicle.name.toLowerCase().includes(searchTermLower) ||
+				vehicle.brand.toLowerCase().includes(searchTermLower) ||
+				vehicle.location.toLowerCase().includes(searchTermLower);
 
-			// Price filter
-			const matchesPrice = car.pricePerDay <= priceRange;
+			const matchesPrice = vehicle.price_per_day <= priceRange;
+			const matchesVehicleType =
+				selectedVehicleTypes.length === 0 || selectedVehicleTypes.includes(vehicle.vehicle_type);
+			const matchesFuelType =
+				selectedFuelTypes.length === 0 ||
+				(vehicle.fuel_type && selectedFuelTypes.includes(vehicle.fuel_type));
+			const matchesTransmission =
+				selectedTransmissions.length === 0 ||
+				(vehicle.transmission && selectedTransmissions.includes(vehicle.transmission));
 
-			// Car type filter
-			const matchesType = carTypeFilter === 'All' || car.type === carTypeFilter;
-
-			return matchesSearch && matchesPrice && matchesType;
+			return (
+				matchesSearch &&
+				matchesPrice &&
+				matchesVehicleType &&
+				matchesFuelType &&
+				matchesTransmission
+			);
 		})
 		.sort((a, b) => {
-			if (sortBy === 'rating') return b.rating - a.rating;
-			if (sortBy === 'priceLowToHigh') return a.pricePerDay - b.pricePerDay;
-			if (sortBy === 'priceHighToLow') return b.pricePerDay - a.pricePerDay;
-			if (sortBy === 'name') return a.name.localeCompare(b.name); // Added sorting by name
+			if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+			if (sortBy === 'priceLowToHigh') return a.price_per_day - b.price_per_day;
+			if (sortBy === 'priceHighToLow') return b.price_per_day - a.price_per_day;
+			if (sortBy === 'name') return a.name.localeCompare(b.name);
 			return 0;
 		});
 
 	// Pagination logic
-	$: totalPages = Math.ceil(filteredCars.length / carsPerPage);
-	$: paginatedCars = filteredCars.slice((currentPage - 1) * carsPerPage, currentPage * carsPerPage);
+	$: totalPages = Math.ceil(filteredAndSortedVehicles.length / carsPerPage);
+	$: paginatedVehicles = filteredAndSortedVehicles.slice(
+		(currentPage - 1) * carsPerPage,
+		currentPage * carsPerPage
+	);
 
-	// Reset to page 1 when filters change
+	// Reset to page 1 when filters or search term change
 	$: {
-		searchTerm, priceRange, carTypeFilter, sortBy;
+		searchTerm, priceRange, selectedVehicleTypes, selectedFuelTypes, selectedTransmissions, sortBy;
 		currentPage = 1;
 	}
 
-	const navigateToCarDetail = (carId: string) => {
-		goto(`/cars/${carId}`);
+	const navigateToVehicleDetail = (vehicleId: string) => {
+		goto(`/cars/${vehicleId}`);
 	};
 
 	const clearFilters = () => {
-		searchTerm = '';
+		selectedVehicleTypes = [];
+		selectedFuelTypes = [];
+		selectedTransmissions = [];
+		priceRange = maxPriceFound;
 		sortBy = 'rating';
-		priceRange = maxPrice;
-		carTypeFilter = 'All';
+		currentPage = 1;
+	};
+
+	const applyAndCloseFilters = () => {
 		showFiltersPanel = false;
 		currentPage = 1;
 	};
+
+	function toggleFilter(array: string[], value: string) {
+		const index = array.indexOf(value);
+		if (index === -1) {
+			array.push(value);
+		} else {
+			array.splice(index, 1);
+		}
+		return array;
+	}
 </script>
 
 <div class="font-quicksand min-h-screen bg-slate-950 pb-20 text-gray-200 antialiased">
-	<!-- Explore Page Header -->
-	<header class="sticky top-0 z-30 bg-slate-950/80 p-4 shadow-md backdrop-blur-lg">
+	<!-- Header -->
+	<header class="sticky top-0 z-30 bg-slate-900/80 p-4 shadow-xl backdrop-blur-lg">
 		<div class="mx-auto flex max-w-7xl items-center gap-4">
 			<button
 				on:click={() => (window.history.length > 1 ? window.history.back() : goto('/'))}
-				class="rounded-full p-2.5 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+				class="rounded-full p-2 text-slate-300 hover:bg-slate-800 hover:text-teal-400"
 				aria-label="Go back"
 			>
 				<ChevronLeft class="h-6 w-6" />
 			</button>
 			<div class="relative flex-grow">
-				<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+				<div class="absolute inset-y-0 left-0 flex items-center pl-3">
 					<Search class="h-5 w-5 text-slate-400" />
 				</div>
 				<input
 					type="search"
 					bind:value={searchTerm}
-					placeholder="Search cars by name, brand, or type..."
-					class="w-full rounded-xl border border-slate-700 bg-slate-800/70 py-3 pl-10 pr-4 text-gray-100 placeholder-slate-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+					placeholder="Search vehicles, brands, or locations..."
+					class="w-full rounded-full border border-slate-700/80 bg-slate-800/70 py-2.5 pl-10 pr-4 text-sm text-gray-100 placeholder-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
 				/>
 			</div>
 			<button
 				on:click={() => (showFiltersPanel = !showFiltersPanel)}
-				class="rounded-xl border border-slate-700 bg-slate-800/70 p-3 text-slate-300 transition-colors hover:border-teal-500/50 hover:text-teal-400"
+				class="rounded-full border border-slate-700/80 bg-slate-800/70 p-2.5 text-slate-300 hover:bg-slate-800 hover:text-teal-400"
 				aria-label="Toggle Filters"
 				aria-expanded={showFiltersPanel}
 			>
@@ -252,20 +215,20 @@
 		</div>
 	</header>
 
-	<main class="mx-auto max-w-7xl px-4 py-6 sm:py-8">
-		<div class="mb-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
-			<h1
-				class="bg-gradient-to-r from-teal-400 to-sky-500 bg-clip-text text-3xl font-bold text-transparent"
-			>
-				Explore Our Fleet ({filteredCars.length})
+	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+		<div class="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+			<h1 class="text-3xl font-bold text-gray-100">
+				Explore Our Fleet
+				{#if !vehiclesLoading}
+					<span class="text-teal-400">({filteredAndSortedVehicles.length})</span>
+				{/if}
 			</h1>
-			<div class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/70 p-1">
-				<span class="px-2 text-xs text-slate-400">Sort by:</span>
+			<div class="relative">
 				<select
 					bind:value={sortBy}
-					class="cursor-pointer rounded-md bg-slate-800 p-2 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-teal-500"
+					class="rounded-full border border-slate-700/80 bg-slate-800/70 px-4 py-2 pr-8 text-sm text-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30"
 				>
-					<option value="rating">Rating</option>
+					<option value="rating">Sort by Rating</option>
 					<option value="priceLowToHigh">Price: Low to High</option>
 					<option value="priceHighToLow">Price: High to Low</option>
 					<option value="name">Name (A-Z)</option>
@@ -273,69 +236,107 @@
 			</div>
 		</div>
 
-		{#if paginatedCars.length > 0}
-			<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4">
-				{#each paginatedCars as car (car.id)}
+		{#if vehiclesLoading}
+			<div class="flex min-h-[50vh] flex-col items-center justify-center">
+				<Loader2 class="mb-4 h-12 w-12 animate-spin text-teal-400" />
+				<p class="text-lg text-slate-400">Loading our fleet...</p>
+			</div>
+		{:else if vehiclesError}
+			<div
+				class="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl bg-slate-800/70 p-8 shadow-lg"
+			>
+				<AlertTriangle class="mb-4 h-12 w-12 text-red-400" />
+				<h2 class="mb-2 text-2xl font-semibold text-red-300">Error</h2>
+				<p class="mb-6 text-slate-400">{vehiclesError}</p>
+				<button
+					on:click={fetchAllVehicles}
+					class="rounded-full bg-teal-500 px-6 py-2.5 text-white hover:bg-teal-600"
+				>
+					Retry
+				</button>
+			</div>
+		{:else if paginatedVehicles.length > 0}
+			<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+				{#each paginatedVehicles as vehicle (vehicle.id)}
 					<div
-						on:click={() => navigateToCarDetail(car.id)}
-						on:keydown={(e) => e.key === 'Enter' && navigateToCarDetail(car.id)}
+						on:click={() => navigateToVehicleDetail(vehicle.id)}
+						on:keydown={(e) => e.key === 'Enter' && navigateToVehicleDetail(vehicle.id)}
 						role="button"
 						tabindex="0"
-						class="group cursor-pointer overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/70 to-slate-900/80 shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 hover:border-teal-500/30 hover:shadow-2xl"
+						class="group rounded-2xl border border-slate-700/50 bg-slate-800/70 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl hover:ring-2 hover:ring-teal-500/30"
 					>
-						<div class="relative h-56 sm:h-64">
+						<div class="relative h-48 overflow-hidden rounded-t-2xl">
 							<img
-								src={car.image}
-								alt={car.name}
-								class="h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+								src={vehicle.image_1}
+								alt="{vehicle.brand} {vehicle.name}"
+								class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
 								loading="lazy"
 							/>
+							<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 							<div
-								class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
-							></div>
-							<div
-								class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-semibold text-yellow-300 shadow-md backdrop-blur-sm"
+								class="absolute right-3 top-3 rounded-full bg-slate-900/80 px-3 py-1 text-xs text-yellow-400"
 							>
-								<Star class="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-								{car.rating.toFixed(1)}
+								<Star class="inline h-4 w-4 fill-yellow-400" />
+								{vehicle.rating.toFixed(1)}
 							</div>
-							<div class="absolute bottom-3 left-3">
+							{#if vehicle.current_status === 'available'}
 								<span
-									class="rounded-lg border border-teal-500/30 bg-teal-500/20 px-3 py-1.5 text-xs font-semibold text-teal-300 backdrop-blur-sm"
-									>{car.type}</span
+									class="absolute left-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs text-white"
 								>
-							</div>
+									Available
+								</span>
+							{:else}
+								<span
+									class="absolute left-3 top-3 rounded-full bg-yellow-600 px-3 py-1 text-xs text-white"
+								>
+									On Request
+								</span>
+							{/if}
 						</div>
 						<div class="p-5">
-							<h2
-								class="mb-1 truncate text-xl font-semibold text-gray-100 transition-colors group-hover:text-teal-400"
-							>
-								{car.name}
+							<h2 class="text-xl font-semibold text-gray-100 group-hover:text-teal-400">
+								{vehicle.brand}
+								{vehicle.name}
 							</h2>
-							<p class="mb-3 text-sm font-medium text-slate-400">{car.brand}</p>
-
-							<div class="mb-4 flex items-center justify-between text-sm text-slate-300">
-								<div class="flex items-center gap-1.5">
-									<Users class="h-4 w-4 text-sky-400" />
-									<span>{car.seats} Seats</span>
-								</div>
-								<div class="flex items-center gap-1.5">
-									{#if car.fuelType === 'Electric'}
-										<Zap class="h-4 w-4 text-green-400" />
-										<span>{car.range} km range</span>
-									{:else}
-										<Fuel class="h-4 w-4 text-orange-400" />
-										<span>{car.fuelType}</span>
-									{/if}
-								</div>
+							<div class="flex items-center gap-2 text-sm text-slate-400">
+								<svelte:component
+									this={vehicleTypeStyles[vehicle.vehicle_type].icon}
+									class="h-4 w-4 {vehicleTypeStyles[vehicle.vehicle_type].color}"
+								/>
+								<span>{vehicle.vehicle_type}</span>
 							</div>
-
-							<div class="flex items-center justify-between">
-								<p class="text-2xl font-bold text-teal-400">
-									${car.pricePerDay}<span class="text-xs font-medium text-slate-400">/day</span>
+							<p class="mt-1 flex items-center text-sm text-slate-500">
+								<span class="mr-1 text-slate-400">📍</span>
+								{vehicle.location}
+							</p>
+							<div class="mt-4 flex items-center justify-between">
+								<div class="flex items-center gap-2 text-sm text-slate-400">
+									<Users class="h-4 w-4 text-teal-400" />
+									<span>{vehicle.seating_capacity} Seats</span>
+								</div>
+								{#if vehicle.fuel_type}
+									<div class="flex items-center gap-2 text-sm text-slate-400">
+										{#if vehicle.fuel_type === 'Electric'}
+											<Zap class="h-4 w-4 text-green-400" />
+										{:else}
+											<Fuel class="h-4 w-4 text-orange-400" />
+										{/if}
+										<span>{vehicle.fuel_type}</span>
+									</div>
+								{/if}
+							</div>
+							{#if vehicle.transmission}
+								<p class="mt-2 text-sm text-slate-400">{vehicle.transmission}</p>
+							{/if}
+							<div class="mt-4 flex items-center justify-between">
+								<p class="text-xl font-bold text-teal-400">
+									₹{vehicle.price_per_day.toLocaleString()}<span class="text-sm text-slate-400"
+										>/day</span
+									>
 								</p>
 								<button
-									class="transform rounded-lg bg-gradient-to-r from-teal-500 to-sky-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:from-teal-600 hover:to-sky-700 group-hover:scale-105"
+									on:click|stopPropagation={() => navigateToVehicleDetail(vehicle.id)}
+									class="rounded-full bg-gradient-to-r from-teal-500 to-cyan-600 px-4 py-2 text-sm text-white hover:from-teal-600 hover:to-cyan-700"
 								>
 									View Details
 								</button>
@@ -346,52 +347,51 @@
 			</div>
 		{:else}
 			<div
-				class="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl bg-slate-800/50 p-8 text-center shadow-lg"
+				class="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl bg-slate-800/70 p-8 shadow-lg"
 			>
-				<FilterX class="mb-6 h-20 w-20 text-teal-500/50" />
-				<h2 class="mb-2 text-2xl font-semibold text-gray-100">No Cars Found</h2>
-				<p class="max-w-md text-slate-400">
-					We couldn't find any cars matching your current search "{searchTerm}". Try adjusting your
-					search or filters.
-				</p>
+				<FilterX class="mb-4 h-16 w-16 text-teal-400/50" />
+				<h2 class="mb-2 text-2xl font-semibold text-gray-100">No Vehicles Found</h2>
+				<p class="mb-6 text-slate-400">Adjust your search or filters to find more vehicles.</p>
 				<button
 					on:click={clearFilters}
-					class="mt-6 rounded-lg bg-teal-600 px-6 py-2.5 font-semibold text-white shadow-md transition-colors hover:bg-teal-500"
+					class="rounded-full bg-teal-500 px-6 py-2.5 text-white hover:bg-teal-600"
 				>
-					Clear Search & Filters
+					Clear Filters
 				</button>
 			</div>
 		{/if}
 
-		<!-- Dynamic Pagination -->
-		{#if filteredCars.length > carsPerPage}
+		<!-- Pagination -->
+		{#if filteredAndSortedVehicles.length > carsPerPage}
 			<div class="mt-10 flex items-center justify-center gap-2">
 				<button
-					on:click={() => (currentPage = currentPage - 1)}
+					on:click={() => (currentPage = Math.max(1, currentPage - 1))}
 					disabled={currentPage === 1}
-					class="rounded-lg bg-slate-800 p-2.5 text-slate-400 hover:text-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
-					aria-label="Previous page"
+					class="rounded-full p-2 text-slate-400 hover:bg-slate-800 hover:text-teal-400 disabled:opacity-50"
 				>
 					<ChevronLeft class="h-5 w-5" />
 				</button>
 				{#each Array(totalPages) as _, i}
 					{@const pageNum = i + 1}
-					<button
-						on:click={() => (currentPage = pageNum)}
-						class="rounded-lg px-4 py-2 text-sm font-medium {currentPage === pageNum
-							? 'bg-teal-500 text-white'
-							: 'bg-slate-800 text-slate-400 hover:bg-slate-700'}"
-						aria-label={`Page ${pageNum}`}
-						aria-current={currentPage === pageNum ? 'page' : undefined}
-					>
-						{pageNum}
-					</button>
+					{#if totalPages <= 7 || pageNum === 1 || pageNum === totalPages || Math.abs(pageNum - currentPage) <= 1}
+						<button
+							on:click={() => (currentPage = pageNum)}
+							class:bg-teal-500={currentPage === pageNum}
+							class:text-white={currentPage === pageNum}
+							class:bg-slate-800={currentPage !== pageNum}
+							class:text-slate-400={currentPage !== pageNum}
+							class="rounded-full px-4 py-2 text-sm hover:bg-slate-700 hover:text-teal-400"
+						>
+							{pageNum}
+						</button>
+					{:else if (totalPages > 7 && pageNum === 2 && currentPage > 3) || (totalPages > 7 && pageNum === totalPages - 1 && currentPage < totalPages - 2)}
+						<span class="px-2 text-slate-500">...</span>
+					{/if}
 				{/each}
 				<button
-					on:click={() => (currentPage = currentPage + 1)}
+					on:click={() => (currentPage = Math.min(totalPages, currentPage + 1))}
 					disabled={currentPage === totalPages}
-					class="rounded-lg bg-slate-800 p-2.5 text-slate-400 hover:text-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
-					aria-label="Next page"
+					class="rounded-full p-2 text-slate-400 hover:bg-slate-800 hover:text-teal-400 disabled:opacity-50"
 				>
 					<ChevronRight class="h-5 w-5" />
 				</button>
@@ -402,94 +402,148 @@
 	<!-- Filters Panel -->
 	{#if showFiltersPanel}
 		<div
-			class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+			class="fixed inset-0 z-40 bg-black/70 backdrop-blur-md"
 			on:click={() => (showFiltersPanel = false)}
 			on:keydown={(e) => e.key === 'Escape' && (showFiltersPanel = false)}
-			aria-hidden="true"
 		></div>
-		<div
-			class="fixed right-0 top-0 z-50 h-full w-80 max-w-[90vw] transform bg-slate-900 p-6 shadow-2xl transition-transform duration-300 ease-out {showFiltersPanel
-				? 'translate-x-0'
-				: 'translate-x-full'}"
-			role="dialog"
-			aria-modal="true"
-			aria-label="Filters panel"
+		<aside
+			class="fixed right-0 top-0 z-50 h-full w-[320px] max-w-[90vw] transform bg-slate-900 p-6 shadow-xl transition-transform duration-300"
+			class:translate-x-0={showFiltersPanel}
+			class:translate-x-full={!showFiltersPanel}
 		>
 			<div class="mb-6 flex items-center justify-between">
 				<h2 class="text-xl font-semibold text-gray-100">Filters</h2>
 				<button
 					on:click={() => (showFiltersPanel = false)}
-					class="rounded-full p-2 text-slate-400 hover:bg-slate-800"
-					aria-label="Close filters panel"
+					class="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-teal-400"
 				>
-					×
+					<X class="h-6 w-6" />
 				</button>
 			</div>
-			<div class="space-y-6 text-sm">
+			<div class="space-y-6">
+				<!-- Vehicle Type Filter -->
+				<div>
+					<h3 class="mb-3 text-sm font-semibold text-gray-100">Vehicle Type</h3>
+					<div class="grid grid-cols-2 gap-2">
+						{#each vehicleTypeChoices as type}
+							<button
+								on:click={() => (selectedVehicleTypes = toggleFilter(selectedVehicleTypes, type))}
+								class:bg-teal-500={selectedVehicleTypes.includes(type)}
+								class:text-white={selectedVehicleTypes.includes(type)}
+								class:bg-slate-800={selectedVehicleTypes.includes(type)}
+								class:text-slate-400={selectedVehicleTypes.includes(type)}
+								class="flex items-center justify-center gap-2 rounded-full border border-slate-700/80 px-3 py-2 text-sm hover:bg-slate-700 hover:text-teal-400"
+							>
+								{#if selectedVehicleTypes.includes(type)}
+									<Check class="h-4 w-4" />
+								{/if}
+								{type}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Fuel Type Filter -->
+				<div>
+					<h3 class="mb-3 text-sm font-semibold text-gray-100">Fuel Type</h3>
+					<div class="grid grid-cols-2 gap-2">
+						{#each fuelTypeChoices as type}
+							<button
+								on:click={() => (selectedFuelTypes = toggleFilter(selectedFuelTypes, type))}
+								class:bg-teal-500={selectedFuelTypes.includes(type)}
+								class:text-white={selectedFuelTypes.includes(type)}
+								class:bg-slate-800={selectedFuelTypes.includes(type)}
+								class:text-slate-400={selectedFuelTypes.includes(type)}
+								class="flex items-center justify-center gap-2 rounded-full border border-slate-700/80 px-3 py-2 text-sm hover:bg-slate-700 hover:text-teal-400"
+							>
+								{#if selectedFuelTypes.includes(type)}
+									<Check class="h-4 w-4" />
+								{/if}
+								{type}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Transmission Filter -->
+				<div>
+					<h3 class="mb-3 text-sm font-semibold text-gray-100">Transmission</h3>
+					<div class="grid grid-cols-2 gap-2">
+						{#each transmissionChoices as type}
+							<button
+								on:click={() => (selectedTransmissions = toggleFilter(selectedTransmissions, type))}
+								class:bg-teal-500={selectedTransmissions.includes(type)}
+								class:text-white={selectedTransmissions.includes(type)}
+								class:bg-slate-800={selectedTransmissions.includes(type)}
+								class:text-slate-400={selectedTransmissions.includes(type)}
+								class="flex items-center justify-center gap-2 rounded-full border border-slate-700/80 px-3 py-2 text-sm hover:bg-slate-700 hover:text-teal-400"
+							>
+								{#if selectedTransmissions.includes(type)}
+									<Check class="h-4 w-4" />
+								{/if}
+								{type}
+							</button>
+						{/each}
+					</div>
+				</div>
+
 				<!-- Price Range Filter -->
-				<label class="block">
-					<span class="text-slate-300">Price Range: ${priceRange}</span>
+				<div>
+					<label class="mb-3 block text-sm font-semibold text-gray-100">
+						Price Range: <span class="text-teal-400">₹{priceRange.toLocaleString()}</span>
+					</label>
 					<input
+						id="priceRange"
 						type="range"
 						min="0"
-						max={maxPrice}
+						max={maxPriceFound}
+						step="100"
 						bind:value={priceRange}
-						class="mt-1 w-full accent-teal-500"
+						class="h-2 w-full rounded-full bg-slate-700 accent-teal-500"
 					/>
-				</label>
+					<div class="mt-2 flex justify-between text-xs text-slate-400">
+						<span>₹0</span>
+						<span>₹{maxPriceFound.toLocaleString()}</span>
+					</div>
+				</div>
 
-				<!-- Car Type Filter -->
-				<label class="block">
-					<span class="text-slate-300">Car Type:</span>
-					<select
-						bind:value={carTypeFilter}
-						class="mt-1 w-full rounded-md border border-slate-700 bg-slate-800 p-2 text-gray-200 focus:ring-teal-500"
+				<div class="space-y-3">
+					<button
+						on:click={applyAndCloseFilters}
+						class="w-full rounded-full bg-gradient-to-r from-teal-500 to-cyan-600 py-3 text-sm text-white hover:from-teal-600 hover:to-cyan-700"
 					>
-						<option value="All">All</option>
-						<option value="Sedan">Sedan</option>
-						<option value="SUV">SUV</option>
-						<option value="Electric">Electric</option>
-						<option value="Luxury">Luxury</option>
-						<option value="Hatchback">Hatchback</option>
-						<option value="Convertible">Convertible</option>
-					</select>
-				</label>
-
-				<button
-					on:click={() => (showFiltersPanel = false)}
-					class="w-full rounded-lg bg-teal-600 py-2.5 font-semibold text-white hover:bg-teal-500"
-				>
-					Apply Filters
-				</button>
-				<button
-					on:click={clearFilters}
-					class="w-full rounded-lg bg-slate-700 py-2.5 font-semibold text-slate-300 hover:bg-slate-600"
-				>
-					Clear Filters
-				</button>
+						Apply Filters
+					</button>
+					<button
+						on:click={clearFilters}
+						class="w-full rounded-full border border-slate-700/80 bg-slate-800/70 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-teal-400"
+					>
+						Clear Filters
+					</button>
+				</div>
 			</div>
-		</div>
+		</aside>
 	{/if}
 </div>
 
 <style>
+	/* Custom styles for range input */
 	input[type='range']::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
 		width: 16px;
 		height: 16px;
-		background: #14b8a6;
+		background: #14b8a6; /* teal-500 */
 		border-radius: 50%;
+		border: 2px solid #1e293b; /* slate-800 */
 		cursor: pointer;
-		border: 2px solid #0f766e;
 	}
-
 	input[type='range']::-moz-range-thumb {
 		width: 16px;
 		height: 16px;
 		background: #14b8a6;
 		border-radius: 50%;
+		border: 2px solid #1e293b;
 		cursor: pointer;
-		border: 2px solid #0f766e;
 	}
 </style>

@@ -29,38 +29,23 @@ declare module '$env/static/private' {
 	export const VITE_API_BASE_URL: string;
 	export const SHELL: string;
 	export const npm_command: string;
-<<<<<<< HEAD
-	export const SESSION_MANAGER: string;
-	export const USER_ZDOTDIR: string;
-	export const QT_SCREEN_SCALE_FACTORS: string;
-	export const COLORTERM: string;
-	export const PYENV_SHELL: string;
-	export const XDG_CONFIG_DIRS: string;
-	export const VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
-=======
 	export const WINDOWID: string;
+	export const npm_config_userconfig: string;
 	export const COLORTERM: string;
 	export const PYENV_SHELL: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
+	export const npm_config_cache: string;
 	export const XDG_SESSION_PATH: string;
 	export const NVIM: string;
 	export const ZSH_CACHE_DIR: string;
 	export const I3SOCK: string;
 	export const NODE: string;
-<<<<<<< HEAD
-	export const MEMORY_PRESSURE_WRITE: string;
-	export const PYDEVD_DISABLE_FILE_VALIDATION: string;
-=======
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
+	export const COLOR: string;
 	export const npm_config_local_prefix: string;
 	export const NVIM_LOG_FILE: string;
 	export const DESKTOP_SESSION: string;
-<<<<<<< HEAD
-	export const GTK_RC_FILES: string;
-	export const NO_AT_BRIDGE: string;
-=======
 	export const KITTY_PID: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
+	export const npm_config_globalconfig: string;
+	export const EDITOR: string;
 	export const PMSPEC: string;
 	export const MASON: string;
 	export const GTK_MODULES: string;
@@ -70,18 +55,11 @@ declare module '$env/static/private' {
 	export const XDG_SESSION_DESKTOP: string;
 	export const QT_QPA_PLATFORMTHEME: string;
 	export const XDG_SESSION_TYPE: string;
-<<<<<<< HEAD
-	export const SYSTEMD_EXEC_PID: string;
-	export const BUNDLED_DEBUGPY_PATH: string;
-	export const _: string;
-	export const XAUTHORITY: string;
-	export const VSCODE_GIT_ASKPASS_NODE: string;
-=======
+	export const npm_config_init_module: string;
 	export const _: string;
 	export const XAUTHORITY: string;
 	export const DESKTOP_STARTUP_ID: string;
 	export const KITTY_PUBLIC_KEY: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 	export const MOTD_SHOWN: string;
 	export const HOME: string;
 	export const LANG: string;
@@ -89,30 +67,30 @@ declare module '$env/static/private' {
 	export const npm_package_version: string;
 	export const STARSHIP_SHELL: string;
 	export const STARSHIP_CONFIG: string;
-<<<<<<< HEAD
-	export const GIT_ASKPASS: string;
-=======
 	export const KITTY_WINDOW_ID: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 	export const XDG_SEAT_PATH: string;
+	export const INIT_CWD: string;
 	export const STARSHIP_SESSION_KEY: string;
 	export const npm_lifecycle_script: string;
 	export const NVM_DIR: string;
+	export const npm_config_npm_version: string;
 	export const ZPFX: string;
 	export const XDG_SESSION_CLASS: string;
 	export const ANDROID_HOME: string;
+	export const TERMINFO: string;
 	export const TERM: string;
 	export const npm_package_name: string;
+	export const npm_config_prefix: string;
 	export const USER: string;
 	export const DISPLAY: string;
 	export const npm_lifecycle_event: string;
 	export const SHLVL: string;
 	export const XDG_VTNR: string;
 	export const XDG_SESSION_ID: string;
-	export const VIRTUAL_ENV_PROMPT: string;
 	export const npm_config_user_agent: string;
 	export const npm_execpath: string;
 	export const XDG_RUNTIME_DIR: string;
+	export const npm_config_strict_ssl: string;
 	export const MYVIMRC: string;
 	export const PYENV_ROOT: string;
 	export const DEBUGINFOD_URLS: string;
@@ -120,10 +98,15 @@ declare module '$env/static/private' {
 	export const BUN_INSTALL: string;
 	export const XDG_DATA_DIRS: string;
 	export const CAPACITOR_ANDROID_STUDIO_PATH: string;
+	export const npm_config_noproxy: string;
 	export const PATH: string;
+	export const npm_config_node_gyp: string;
 	export const DBUS_SESSION_BUS_ADDRESS: string;
+	export const npm_config_global_prefix: string;
 	export const MAIL: string;
+	export const KITTY_INSTALLATION_DIR: string;
 	export const npm_node_execpath: string;
+	export const npm_config_engine_strict: string;
 	export const OLDPWD: string;
 	export const NODE_ENV: string;
 }
@@ -160,38 +143,23 @@ declare module '$env/dynamic/private' {
 		VITE_API_BASE_URL: string;
 		SHELL: string;
 		npm_command: string;
-<<<<<<< HEAD
-		SESSION_MANAGER: string;
-		USER_ZDOTDIR: string;
-		QT_SCREEN_SCALE_FACTORS: string;
-		COLORTERM: string;
-		PYENV_SHELL: string;
-		XDG_CONFIG_DIRS: string;
-		VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
-=======
 		WINDOWID: string;
+		npm_config_userconfig: string;
 		COLORTERM: string;
 		PYENV_SHELL: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
+		npm_config_cache: string;
 		XDG_SESSION_PATH: string;
 		NVIM: string;
 		ZSH_CACHE_DIR: string;
 		I3SOCK: string;
 		NODE: string;
-<<<<<<< HEAD
-		MEMORY_PRESSURE_WRITE: string;
-		PYDEVD_DISABLE_FILE_VALIDATION: string;
-=======
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
+		COLOR: string;
 		npm_config_local_prefix: string;
 		NVIM_LOG_FILE: string;
 		DESKTOP_SESSION: string;
-<<<<<<< HEAD
-		GTK_RC_FILES: string;
-		NO_AT_BRIDGE: string;
-=======
 		KITTY_PID: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
+		npm_config_globalconfig: string;
+		EDITOR: string;
 		PMSPEC: string;
 		MASON: string;
 		GTK_MODULES: string;
@@ -201,18 +169,11 @@ declare module '$env/dynamic/private' {
 		XDG_SESSION_DESKTOP: string;
 		QT_QPA_PLATFORMTHEME: string;
 		XDG_SESSION_TYPE: string;
-<<<<<<< HEAD
-		SYSTEMD_EXEC_PID: string;
-		BUNDLED_DEBUGPY_PATH: string;
-		_: string;
-		XAUTHORITY: string;
-		VSCODE_GIT_ASKPASS_NODE: string;
-=======
+		npm_config_init_module: string;
 		_: string;
 		XAUTHORITY: string;
 		DESKTOP_STARTUP_ID: string;
 		KITTY_PUBLIC_KEY: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 		MOTD_SHOWN: string;
 		HOME: string;
 		LANG: string;
@@ -220,30 +181,30 @@ declare module '$env/dynamic/private' {
 		npm_package_version: string;
 		STARSHIP_SHELL: string;
 		STARSHIP_CONFIG: string;
-<<<<<<< HEAD
-		GIT_ASKPASS: string;
-=======
 		KITTY_WINDOW_ID: string;
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 		XDG_SEAT_PATH: string;
+		INIT_CWD: string;
 		STARSHIP_SESSION_KEY: string;
 		npm_lifecycle_script: string;
 		NVM_DIR: string;
+		npm_config_npm_version: string;
 		ZPFX: string;
 		XDG_SESSION_CLASS: string;
 		ANDROID_HOME: string;
+		TERMINFO: string;
 		TERM: string;
 		npm_package_name: string;
+		npm_config_prefix: string;
 		USER: string;
 		DISPLAY: string;
 		npm_lifecycle_event: string;
 		SHLVL: string;
 		XDG_VTNR: string;
 		XDG_SESSION_ID: string;
-		VIRTUAL_ENV_PROMPT: string;
 		npm_config_user_agent: string;
 		npm_execpath: string;
 		XDG_RUNTIME_DIR: string;
+		npm_config_strict_ssl: string;
 		MYVIMRC: string;
 		PYENV_ROOT: string;
 		DEBUGINFOD_URLS: string;
@@ -251,10 +212,15 @@ declare module '$env/dynamic/private' {
 		BUN_INSTALL: string;
 		XDG_DATA_DIRS: string;
 		CAPACITOR_ANDROID_STUDIO_PATH: string;
+		npm_config_noproxy: string;
 		PATH: string;
+		npm_config_node_gyp: string;
 		DBUS_SESSION_BUS_ADDRESS: string;
+		npm_config_global_prefix: string;
 		MAIL: string;
+		KITTY_INSTALLATION_DIR: string;
 		npm_node_execpath: string;
+		npm_config_engine_strict: string;
 		OLDPWD: string;
 		NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;

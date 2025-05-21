@@ -1,38 +1,6 @@
 import type { LayoutLoad } from './$types';
 import { authStore } from '$lib/stores/auth';
 
-<<<<<<< HEAD
-export const load: LayoutLoad = async ({ url, depends }) => {
-    // This ensures client-side only behavior
-    depends('app:auth');
-    
-    // Only run auth logic on client
-    if (typeof window === 'undefined') {
-        return {};
-    }
-
-    // Wait for store to sync with localStorage
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    const user = get(authStore);
-    const isAuthenticated = !!user;
-    const path = url.pathname;
-
-    console.log('Auth check - User:', user, 'Path:', path);
-
-    // Public routes that don't require auth
-    const publicRoutes = ['/intro', '/signin', '/signup'];
-    
-    if (!isAuthenticated && !publicRoutes.includes(path)) {
-        throw redirect(307, '/intro');
-    }
-
-    if (isAuthenticated && publicRoutes.includes(path)) {
-        throw redirect(307, user?.role === 'admin' ? '/adminhome' : '/home');
-    }
-
-    return { user };
-=======
 export const prerender = true;
 export const load: LayoutLoad = async () => {
 	// Check localStorage directly for user data
@@ -52,8 +20,5 @@ export const load: LayoutLoad = async () => {
 	authStore.set(user);
 
 	return { user };
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 };
 
-export const ssr = false;  // Disable SSR for this layout
-export const csr = true;   // Ensure CSR is enabled

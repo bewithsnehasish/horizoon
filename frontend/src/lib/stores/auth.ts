@@ -1,29 +1,4 @@
 import { writable } from 'svelte/store';
-<<<<<<< HEAD
-import { browser } from '$app/environment';
-
-type User = {
-    token: string;
-    role: 'user' | 'admin';
-    email: string;
-};
-
-// Initialize with null on server, or with localStorage value on client
-const initialUser = browser ? JSON.parse(localStorage.getItem('authUser') || 'null') : null;
-
-export const authStore = writable<User | null>(initialUser);
-
-// Only subscribe to changes on client
-if (browser) {
-    authStore.subscribe((user) => {
-        if (user) {
-            localStorage.setItem('authUser', JSON.stringify(user));
-        } else {
-            localStorage.removeItem('authUser');
-        }
-    });
-}
-=======
 
 type User = {
 	token: string;
@@ -82,7 +57,6 @@ authStore.subscribe((user) => {
 		}
 	}
 });
->>>>>>> 99030e754e9ac06eb63021760836ffc9ee173051
 
 export function getAuthToken(): string | null {
 	const token = getLocalStorageItem('authToken');
