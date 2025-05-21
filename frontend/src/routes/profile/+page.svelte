@@ -111,7 +111,7 @@
 		{
 			label: 'Edit Profile',
 			icon: Edit3,
-			action: () => goto('/profile/edit'),
+			action: () => goto('/completeprofile'),
 			color: 'text-sky-400'
 		},
 		{
@@ -158,7 +158,7 @@
 			</button>
 			<h1 class="text-xl font-semibold text-gray-100">Profile</h1>
 			<button
-				on:click={() => goto('/profile/edit')}
+				on:click={() => goto('/completeprofile')}
 				class="rounded-full p-2.5 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white {userData
 					? 'opacity-100'
 					: 'pointer-events-none opacity-0'}"

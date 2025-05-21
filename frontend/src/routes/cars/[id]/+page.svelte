@@ -7,8 +7,6 @@
 		Loader2,
 		AlertTriangle,
 		ChevronLeft,
-		Share2,
-		Heart,
 		Star,
 		Users,
 		Fuel,
@@ -21,14 +19,8 @@
 		CalendarDays,
 		Clock3,
 		DollarSign,
-		Wrench,
-		Copyright,
 		Sparkles as StarIconFull,
-		StarHalf,
-		Info,
-		UserCircle2,
-		Mail,
-		Phone
+		StarHalf
 	} from 'lucide-svelte';
 
 	// Interfaces

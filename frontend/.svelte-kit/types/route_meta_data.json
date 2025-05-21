@@ -6,6 +6,9 @@
 	"/bookings": [
 		"src/routes/+layout.ts"
 	],
+	"/bookings/new": [
+		"src/routes/+layout.ts"
+	],
 	"/cars": [
 		"src/routes/+layout.ts"
 	],
