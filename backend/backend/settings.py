@@ -26,6 +26,7 @@ ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
+    "cron",
     "corsheaders",
     "business",
     "authentication",
@@ -47,6 +48,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'django.middleware.security.SecurityMiddleware', 
+    #whitenoise middleware1
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    #whitenoise middleware2
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -72,12 +77,22 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+import dj_database_url
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # Password validation
@@ -143,8 +158,14 @@ JAZZMIN_SETTINGS = {
 }
 
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:4173"]
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+# Enable Gzip compression
+WHITENOISE_USE_FINDERS = True
+
+# Enable WhiteNoise's built-in static file compression (for .gzip, .br files)
+WHITENOISE_MANIFEST_STRICT = False
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")

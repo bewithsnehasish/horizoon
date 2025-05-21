@@ -22,4 +22,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("authentication/", include("authentication.urls")),
     path("business/", include("business.urls")),
+    path('cron', include('cron.urls')),
 ]
