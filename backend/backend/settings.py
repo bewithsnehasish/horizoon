@@ -144,7 +144,7 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Horizoon Wheels",
     "welcome_sign": "Welcome to the Horizoon Wheels Admin Panel",
     "copyright": "Horizoon Wheels Pvt. Ltd.",
-    "search_model": ["authentication.Client", "authentication.Renter"],
+    "search_model": ["authentication.Client", "authentication.Renter", "backend.Order", "backend.Vehicle"],
     "login_logo": None,
     "login_logo_dark": None,
     "site_icon": None,
