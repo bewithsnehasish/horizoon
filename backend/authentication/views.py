@@ -9,8 +9,9 @@ from google.oauth2 import id_token
 from rest_framework.decorators import api_view
 from rest_framework.views import status
 
-from .models import  Client, ClientDetails, Renter
 from backend.settings import GOOGLE_CLIENT_ID
+
+from .models import Client, ClientDetails, Renter
 
 
 def create_client(username, email, password):
@@ -34,7 +35,7 @@ def register(request):
             username = data.get("username")
             email = data.get("email")
             password = data.get("password")
-            
+
             if not all([username, email, password]):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
@@ -59,7 +60,7 @@ def register(request):
 def google_login(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
-        
+
         id_token_str = data.get("id_token")
         username = data.get("username")
         email = data.get("email")
@@ -68,9 +69,7 @@ def google_login(request):
             return JsonResponse({"error": "Missing required fields"}, status=400)
 
         # Verify Google ID token
-        client_id = (
-            GOOGLE_CLIENT_ID
-        )
+        client_id = GOOGLE_CLIENT_ID
         idinfo = id_token.verify_oauth2_token(
             id_token_str, google_requests.Request(), client_id
         )
@@ -105,7 +104,7 @@ def google_login(request):
             "Google registration successful" if created else "Google login successful"
         )
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        
+
         return JsonResponse(
             {
                 "token": str(client.authToken),
@@ -141,8 +140,6 @@ def login(request):
                     {"error": "Both identifier and password are required"}, status=400
                 )
 
-            
-
             # Check if identifier is an email (contains @) for Client
             if "@" in identifier:
                 # Try to authenticate as Client
@@ -165,7 +162,6 @@ def login(request):
                     return JsonResponse(
                         {"error": "No client found with this email"}, status=404
                     )
-            
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
@@ -204,6 +200,7 @@ def add_client_details(request):
                 name = data["name"]
                 phone = data["phone"]
                 gender = data["gender"]
+                aadhaar = data["aadhaar"]
 
                 if ClientDetails.objects.filter(client=client).exists():
                     try:
@@ -212,6 +209,7 @@ def add_client_details(request):
                         cd.name = name
                         cd.phone = phone
                         cd.gender = gender
+                        cd.aadhaar = aadhaar
                         cd.save()
                     except:
                         return JsonResponse(
@@ -234,18 +232,23 @@ def add_client_details(request):
                     try:
                         # Create or update client details
                         client_details = ClientDetails(
-                            client=client, name=name, phone=phone, gender=gender
+                            client=client,
+                            name=name,
+                            phone=phone,
+                            gender=gender,
+                            aadhaar=aadhaar,
                         )
 
                         client_details.save()
-                    except:
-                        return JsonResponse(
-                            {
-                                "success": False,
-                                "message": "This Phone Number Already Registered",
-                            },
-                            status=401,
-                        )
+                    except Exception as e:
+                        return JsonResponse({"error": str(e)}, status=400)
+                        # return JsonResponse(
+                        #     {
+                        #         "success": False,
+                        #         "message": "This Phone Number Already Registered",
+                        #     },
+                        #     status=401,
+                        # )
 
                     return JsonResponse(
                         {
@@ -345,8 +348,6 @@ def get_client_details(request):
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
-
-
 @csrf_exempt
 @api_view(["POST"])
 def get_renter_details(request):
@@ -354,7 +355,7 @@ def get_renter_details(request):
         try:
             data = json.loads(request.body.decode("utf-8"))
             renter_id = data.get("renter_id")
-            
+
             if not all([renter_id]):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
@@ -362,14 +363,14 @@ def get_renter_details(request):
                 renter_obj = Renter.objects.filter(user_id=renter_id).first()
             except:
                 return JsonResponse({"error": "Renter Not found"}, status=200)
-            
+
             return JsonResponse(
                 {
                     "full_name": renter_obj.full_name,
                     "address": renter_obj.address,
                     "profile_pic": renter_obj.profile_pic,
                     "rating": renter_obj.rating,
-                    "status": renter_obj.verification_status
+                    "status": renter_obj.verification_status,
                 },
                 status=201,
             )
@@ -378,3 +379,4 @@ def get_renter_details(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Method not allowed"}, status=405)
+

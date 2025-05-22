@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { getAuthToken, logout } from '$lib/stores/auth'; // Ensure this path is correct
-
-	// Lucide Icons
+	import { getAuthToken, logout } from '$lib/stores/auth';
 	import {
 		Mail,
 		Phone,
@@ -15,10 +13,11 @@
 		Loader2,
 		ShieldAlert,
 		CalendarDays,
-		Car, // Icon for "Become a Renter"
-		FileText, // Could be for Terms & Conditions
-		HelpCircle // For Support
+		Car,
+		FileText,
+		HelpCircle
 	} from 'lucide-svelte';
+	import { fade } from 'svelte/transition';
 
 	interface ClientDetails {
 		username: string;
@@ -33,18 +32,17 @@
 
 	interface UserProfileData {
 		client: ClientDetails;
-		details: UserMoreDetails;
+		details: UserMoreDetails | null;
 	}
 
 	let userData: UserProfileData | null = null;
 	let loading = true;
 	let error: string | null = null;
-	// Ensure VITE_API_BASE_URL is set in your .env file for production-readiness
 	const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://0.0.0.0:8000';
 	const API_URL = `${API_BASE_URL}/authentication/get-client-details/`;
 
-	function getInitials(name: string): string {
-		if (!name) return 'H'; // Horizoon default
+	function getInitials(name: string | null): string {
+		if (!name) return 'H';
 		const parts = name.trim().split(' ');
 		if (parts.length > 1 && parts[0] && parts[parts.length - 1]) {
 			return parts[0][0].toUpperCase() + parts[parts.length - 1][0].toUpperCase();
@@ -91,6 +89,13 @@
 
 			if (responseData.success) {
 				userData = responseData.data as UserProfileData;
+				if (userData.details === null) {
+					// Redirect to /completeprofile if no details are added
+					setTimeout(() => goto('/completeprofile'), 1000);
+					error = 'Please complete your profile to continue.';
+					loading = false;
+					return;
+				}
 			} else {
 				throw new Error(responseData.message || 'Failed to retrieve profile data.');
 			}
@@ -98,7 +103,9 @@
 			console.error('Failed to fetch profile:', err);
 			error = err.message || 'An unexpected network error occurred.';
 		} finally {
-			loading = false;
+			if (userData?.details !== null) {
+				loading = false;
+			}
 		}
 	});
 
@@ -122,10 +129,10 @@
 		},
 		{
 			label: 'Become a Renter',
-			icon: Car, // Using Car for 'Become a Renter'
-			action: () => goto('/renter-application'), // Example path
+			icon: Car,
+			action: () => goto('/renter-application'),
 			color: 'text-emerald-400',
-			highlight: true // To make it stand out
+			highlight: true
 		}
 	];
 
@@ -147,7 +154,7 @@
 
 <div class="font-quicksand min-h-screen bg-slate-950 text-gray-200 antialiased">
 	<!-- Profile Header -->
-	<header class="sticky top-0 z-30 bg-slate-950/80 p-4 shadow-sm backdrop-blur-lg">
+	<header class="sticky top-0 z-40 bg-slate-950/90 px-4 py-4 shadow-sm backdrop-blur-xl">
 		<div class="mx-auto flex max-w-3xl items-center justify-between">
 			<button
 				on:click={() => (window.history.length > 1 ? window.history.back() : goto('/'))}
@@ -156,10 +163,11 @@
 			>
 				<ChevronLeft class="h-6 w-6" />
 			</button>
-			<h1 class="text-xl font-semibold text-gray-100">Profile</h1>
+			<h1 class="text-xl font-semibold text-gray-100 sm:text-2xl">Profile</h1>
 			<button
 				on:click={() => goto('/completeprofile')}
-				class="rounded-full p-2.5 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white {userData
+				class="rounded-full p-2.5 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white {userData &&
+				userData.details !== null
 					? 'opacity-100'
 					: 'pointer-events-none opacity-0'}"
 				aria-label="Edit Profile"
@@ -171,29 +179,37 @@
 
 	<main class="pb-24 pt-4 sm:pb-28">
 		{#if loading}
-			<div class="flex min-h-[calc(100vh-150px)] flex-col items-center justify-center">
-				<Loader2 class="mb-6 h-12 w-12 animate-spin text-teal-400" />
-				<p class="text-lg text-slate-400">Loading your profile...</p>
-			</div>
-		{:else if error && !userData}
 			<div
-				class="mx-auto mt-16 max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-8 text-center shadow-xl"
+				class="flex min-h-[calc(100vh-150px)] flex-col items-center justify-center"
+				transition:fade={{ duration: 300 }}
 			>
-				<ShieldAlert class="mx-auto mb-5 h-16 w-16 text-red-500" />
-				<h2 class="mb-3 text-2xl font-bold text-red-400">Access Denied</h2>
-				<p class="mb-8 text-base leading-relaxed text-slate-300">{error}</p>
+				<Loader2 class="mb-6 h-12 w-12 animate-spin text-teal-400" />
+				<p class="text-lg font-medium text-slate-200">Loading your profile...</p>
+			</div>
+		{:else if error}
+			<div
+				class="mx-auto mt-16 max-w-md rounded-3xl border border-slate-700/50 bg-slate-900/80 p-8 text-center shadow-xl"
+				transition:fade={{ duration: 300 }}
+			>
+				<ShieldAlert class="mx-auto mb-5 h-16 w-16 text-red-400" />
+				<h2 class="mb-3 text-xl font-semibold text-red-300">
+					{userData && userData.details === null ? 'Complete Your Profile' : 'Access Denied'}
+				</h2>
+				<p class="mb-8 text-sm text-slate-300">{error}</p>
 				<button
-					on:click={() => goto('/intro')}
-					class="w-full transform rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-teal-600 hover:to-cyan-700"
+					on:click={() =>
+						userData && userData.details === null ? goto('/completeprofile') : goto('/intro')}
+					class="w-full rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-md transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-400/50"
 				>
-					Login / Sign Up
+					{userData && userData.details === null ? 'Complete Profile' : 'Login / Sign Up'}
 				</button>
 			</div>
-		{:else if userData}
+		{:else if userData && userData.details}
 			<div class="mx-auto max-w-3xl space-y-8 px-4">
 				<!-- User Info Card -->
 				<section
 					class="relative overflow-hidden rounded-3xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 to-slate-900/90 p-6 shadow-2xl"
+					transition:fade={{ duration: 300 }}
 				>
 					<div
 						class="absolute -right-16 -top-10 h-48 w-48 rounded-full bg-teal-600/20 opacity-70 blur-3xl filter"
@@ -217,7 +233,7 @@
 								{userData.details.name}
 							</h2>
 							<p class="mt-1.5 text-base font-medium text-teal-300">@{userData.client.username}</p>
-							<p class="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-400">
+							<p class="mt-2 line-clamp-2 text-sm text-slate-400">
 								Your personal hub for managing rides and experiences with Horizoon.
 							</p>
 						</div>
@@ -225,14 +241,17 @@
 				</section>
 
 				<!-- Account Details Section -->
-				<section class="rounded-2xl border border-slate-800/70 bg-slate-900 p-6 shadow-xl">
+				<section
+					class="rounded-3xl border border-slate-800/70 bg-slate-900/80 p-6 shadow-xl"
+					transition:fade={{ duration: 300 }}
+				>
 					<h3 class="mb-5 border-b border-slate-700/60 pb-3 text-xl font-semibold text-gray-100">
 						Personal Information
 					</h3>
 					<dl class="space-y-5">
 						<div class="flex items-start">
 							<div
-								class="mr-4 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800"
+								class="mr-4 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800/60"
 							>
 								<Mail class="h-5 w-5 text-teal-400" />
 							</div>
@@ -245,7 +264,7 @@
 						</div>
 						<div class="flex items-start">
 							<div
-								class="mr-4 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800"
+								class="mr-4 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800/60"
 							>
 								<Phone class="h-5 w-5 text-teal-400" />
 							</div>
@@ -258,7 +277,7 @@
 						</div>
 						<div class="flex items-start">
 							<div
-								class="mr-4 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800"
+								class="mr-4 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800/60"
 							>
 								<Award class="h-5 w-5 text-teal-400" />
 							</div>
@@ -274,7 +293,8 @@
 
 				<!-- Profile Links Section -->
 				<section
-					class="divide-y divide-slate-800/70 rounded-2xl border border-slate-800/70 bg-slate-900 shadow-xl"
+					class="divide-y divide-slate-800/70 rounded-3xl border border-slate-800/70 bg-slate-900/80 shadow-xl"
+					transition:fade={{ duration: 300 }}
 				>
 					{#each profileLinks as link (link.label)}
 						<button
@@ -284,7 +304,7 @@
 						>
 							<div class="flex items-center">
 								<div
-									class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-slate-800 {link.highlight
+									class="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-slate-800/60 {link.highlight
 										? 'bg-teal-500/20'
 										: ''} mr-4 rounded-lg border border-slate-700 transition-colors group-hover:border-slate-600"
 								>
@@ -310,7 +330,8 @@
 
 				<!-- Support & Legal Links -->
 				<section
-					class="divide-y divide-slate-800/70 rounded-2xl border border-slate-800/70 bg-slate-900 shadow-xl"
+					class="divide-y divide-slate-800/70 rounded-3xl border border-slate-800/70 bg-slate-900/80 shadow-xl"
+					transition:fade={{ duration: 300 }}
 				>
 					{#each supportLinks as link (link.label)}
 						<button
@@ -319,7 +340,7 @@
 						>
 							<div class="flex items-center">
 								<div
-									class="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 transition-colors group-hover:border-slate-600"
+									class="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800/60 transition-colors group-hover:border-slate-600"
 								>
 									<svelte:component
 										this={link.icon}
@@ -356,7 +377,6 @@
 	:global(.font-quicksand) {
 		font-family: 'Quicksand', sans-serif;
 	}
-	/* Custom utility if needed for line-clamp, though Tailwind usually has this */
 	.line-clamp-2 {
 		overflow: hidden;
 		display: -webkit-box;

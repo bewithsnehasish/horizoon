@@ -2,6 +2,7 @@
 	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import axios from 'axios';
 	import { fly, fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
@@ -20,6 +21,9 @@
 		PartyPopper
 	} from 'lucide-svelte';
 	import { getAuthToken } from '$lib/stores/auth';
+
+	// Disable prerendering for this page
+	export const prerender = false;
 
 	// Interfaces
 	interface Vehicle {
@@ -66,6 +70,8 @@
 
 	let formErrors: { [key: string]: string } = {};
 
+	let vehicleId = '';
+
 	const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://0.0.0.0:8000';
 	const vehicleApiUrl = `${API_BASE_URL}/business/vehicle_details/`;
 	const availabilityApiUrl = `${API_BASE_URL}/business/booking/availability/`;
@@ -73,7 +79,21 @@
 
 	const authToken = getAuthToken();
 
-	$: vehicleId = $page.url.searchParams.get('vehicleId') || '';
+	// Extract vehicleId only in browser context
+	$: if (browser) {
+		vehicleId = $page.url.searchParams.get('vehicleId') || '';
+		console.log('Extracted vehicleId:', vehicleId);
+	}
+
+	// Redirect if no auth token
+	onMount(() => {
+		if (!authToken) {
+			console.log('No auth token found, redirecting to /intro');
+			goto('/intro', { replaceState: true });
+			return;
+		}
+		fetchVehicleDetails();
+	});
 
 	let minPickupDateString = '';
 	function updateMinPickupDate() {
@@ -230,7 +250,13 @@
 	}
 
 	async function submitBooking() {
-		if (!validateStep2() || !isAvailable || !authToken) return;
+		if (!validateStep2() || !isAvailable || !authToken) {
+			if (!authToken) {
+				bookingError = 'Authentication required. Please log in.';
+				setTimeout(() => goto('/intro'), 1000);
+			}
+			return;
+		}
 
 		bookingLoading = true;
 		bookingError = null;
@@ -285,14 +311,9 @@
 			goto('/');
 		}, 7000);
 	}
-
-	onMount(() => {
-		fetchVehicleDetails();
-	});
 </script>
 
 <div class="font-quicksand min-h-screen bg-slate-950 text-gray-200 antialiased">
-	<!-- Header -->
 	<header class="sticky top-0 z-40 bg-slate-950/90 px-4 py-4 shadow-lg backdrop-blur-xl">
 		<div class="mx-auto flex max-w-4xl items-center justify-between">
 			{#if currentStep <= totalSteps}
