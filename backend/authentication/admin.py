@@ -12,7 +12,7 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 @admin.register(ClientDetails)
-class ClientDetailsAdmin(admin.ModelAdmin):
+class ClientDetailsAdmin(admin.ModelAdmin):  
     search_fields = ['name', 'phone', 'aadhaar']
     list_filter = ['gender', 'joinedAt']
     date_hierarchy = 'joinedAt'
@@ -22,6 +22,7 @@ class ClientDetailsAdmin(admin.ModelAdmin):
 
 @admin.register(Renter)
 class RenterAdmin(admin.ModelAdmin):
+    
     search_fields = ['full_name', 'email', 'aadhaar', 'phone']
     list_filter = ['gender', 'verification_status', 'joinedAt']
     date_hierarchy = 'joinedAt'

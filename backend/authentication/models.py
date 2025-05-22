@@ -9,6 +9,9 @@ User = get_user_model()
 
 
 class Client(models.Model):
+    """
+    Stores Client Auth Details:------------:For Personal info refer :model:`authentication.ClientDetails`
+    """
     user_id = models.UUIDField(default=uuid.uuid4, editable=False,unique=True)
     username = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
@@ -34,6 +37,9 @@ class Client(models.Model):
 
 
 class ClientDetails(models.Model):
+    """
+    Stores Personal Information of the clients:------------:For Auth info refer :model:`authentication.Client`
+    """
     client = models.OneToOneField(Client, on_delete=models.CASCADE, unique=True)
     name = models.CharField(max_length=100)
     phone = models.CharField(
@@ -51,11 +57,16 @@ class ClientDetails(models.Model):
     age = models.IntegerField(default=18)
     aadhaar = models.CharField(max_length=100, validators=[aadhaar_regex], unique=True)
     joinedAt = models.DateTimeField(auto_now_add=True, editable=False)
-
+    class Meta:
+        verbose_name = "Client Detail"
+        verbose_name_plural = "Client Details"
     def __str__(self):
         return f"Name: {self.name} / Phone: {self.phone} / Gender: {self.gender}"
 
 class Renter(models.Model):
+    """
+    Stores Renter Profile Details
+    """
     user_id = models.UUIDField(default=uuid.uuid4, editable=False,unique=True)
     profile_pic = models.TextField(blank=True)
     full_name = models.CharField(max_length=200)

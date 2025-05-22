@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "business",
     "authentication",
     "jazzmin",
+    "django.contrib.admindocs",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     #whitenoise middleware1
     'whitenoise.middleware.WhiteNoiseMiddleware', 
     #whitenoise middleware2
+    "django.contrib.admindocs.middleware.XViewMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
