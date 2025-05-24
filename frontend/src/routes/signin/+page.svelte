@@ -1,4 +1,4 @@
-<!-- src/routes/login/+page.svelte -->
+<!-- src/routes/signin/+page.svelte -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { Eye, EyeOff } from 'lucide-svelte';

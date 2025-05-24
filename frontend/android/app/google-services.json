@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "14943130044",
+    "project_id": "horizoon-wheels",
+    "storage_bucket": "horizoon-wheels.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:14943130044:android:2a6d832b8f8bcd0fa0dbb9",
+        "android_client_info": {
+          "package_name": "com.horizoon.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "14943130044-fd83k0b04eriaugip2b5ucq44fel4tju.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.horizoon.app",
+            "certificate_hash": "6b8130165059848f4b9877e25302edb92c8c7b09"
+          }
+        },
+        {
+          "client_id": "14943130044-ui2n1jghk3gscl3ujcsntoqk35ovkjgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCICGua0HV97vVoeNbQHZFYXpNZfcv9XC8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "14943130044-u7cgmqugm59i133hilr9lmvipongp03b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

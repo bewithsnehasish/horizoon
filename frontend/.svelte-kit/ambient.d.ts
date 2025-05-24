@@ -37,6 +37,7 @@ declare module '$env/static/private' {
 	export const ZSH_CACHE_DIR: string;
 	export const I3SOCK: string;
 	export const NODE: string;
+	export const GRADLE_HOME: string;
 	export const npm_config_local_prefix: string;
 	export const NVIM_LOG_FILE: string;
 	export const DESKTOP_SESSION: string;
@@ -137,6 +138,7 @@ declare module '$env/dynamic/private' {
 		ZSH_CACHE_DIR: string;
 		I3SOCK: string;
 		NODE: string;
+		GRADLE_HOME: string;
 		npm_config_local_prefix: string;
 		NVIM_LOG_FILE: string;
 		DESKTOP_SESSION: string;
