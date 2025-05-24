@@ -1,8 +1,7 @@
-<!-- src/routes/signin/+page.svelte -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Eye, EyeOff } from 'lucide-svelte';
-	import { login } from '$lib/stores/auth';
+	import { Eye, EyeOff, Loader2 } from 'lucide-svelte';
+	import { login, loginWithGoogle } from '$lib/stores/auth';
 
 	// Shadcn-svelte components
 	import { Button } from '$lib/components/ui/button';
@@ -22,9 +21,10 @@
 	let loginPassword = '';
 	let errorMessage = '';
 	let validationErrors: { [key: string]: string } = {};
-	let isLoading = $state(false);
+	let isLoading = false;
+	let isGoogleLoading = false;
 
-	// Validate form inputs
+	// Validate form inputs - FIXED password validation
 	const validateForm = () => {
 		const errors: { [key: string]: string } = {};
 
@@ -34,8 +34,8 @@
 			errors.email = 'Please enter a valid email address';
 		}
 
-		// Password validation
-		if (!loginPassword || loginPassword.length < 3) {
+		// Password validation - FIXED to match error message
+		if (!loginPassword || loginPassword.length < 6) {
 			errors.password = 'Password must be at least 6 characters long';
 		}
 
@@ -43,7 +43,7 @@
 		return Object.keys(errors).length === 0;
 	};
 
-	// Handle login form submission
+	// Handle regular login form submission
 	const handleLogin = async () => {
 		// Clear previous errors
 		errorMessage = '';
@@ -70,21 +70,36 @@
 		}
 	};
 
+	// Handle Google Sign-In
+	const handleGoogleSignIn = async () => {
+		errorMessage = '';
+		isGoogleLoading = true;
+
+		try {
+			console.log('Initiating Google sign-in...');
+			const result = await loginWithGoogle();
+
+			if (result.success) {
+				console.log('Google sign-in successful, redirecting...');
+				goto('/');
+			} else {
+				console.error('Google sign-in failed:', result.error);
+				errorMessage = result.error || 'Google sign-in failed';
+			}
+		} catch (error) {
+			console.error('Google sign-in error:', error);
+			errorMessage = 'An error occurred during Google sign-in';
+		} finally {
+			isGoogleLoading = false;
+		}
+	};
+
 	const backgroundImageUrl =
 		'https://images.unsplash.com/photo-1685729847171-7c7e631c2359?q=80&w=2126&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-
-	// Social providers for "Sign In"
-	const socialProviders = [
-		{
-			label: 'Google',
-			iconUrl: 'https://storage.googleapis.com/a1aa/image/29da2f80-2463-44b2-7766-8ab8f907eea7.jpg',
-			href: '/auth/google'
-		}
-	];
 </script>
 
 <svelte:head>
-	<title>Sign In</title>
+	<title>Sign In - Horizoon</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link
@@ -167,11 +182,14 @@
 				{/if}
 				<Button
 					type="submit"
-					disabled={isLoading}
-					class="!mt-6 w-full rounded-md bg-blue-600 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					disabled={isLoading || isGoogleLoading}
+					class="!mt-6 w-full rounded-md bg-blue-600 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
 				>
 					{#if isLoading}
-						<span class="animate-pulse">Logging In...</span>
+						<div class="flex items-center justify-center gap-2">
+							<Loader2 class="h-4 w-4 animate-spin" />
+							<span>Logging In...</span>
+						</div>
 					{:else}
 						Login
 					{/if}
@@ -188,19 +206,27 @@
 				</div>
 			</div>
 
-			<!-- Social Login Buttons -->
+			<!-- Enhanced Google Login Button -->
 			<div class="space-y-3">
-				{#each socialProviders as provider (provider.label)}
-					<Button
-						variant="outline"
-						class="flex w-full items-center justify-center space-x-2 border-neutral-600 text-gray-200 hover:bg-neutral-700/50 hover:text-white"
-						aria-label={`Sign in with ${provider.label}`}
-						on:click={() => goto(provider.href)}
-					>
-						<img src={provider.iconUrl} alt="" class="h-5 w-5" />
-						<span>{provider.label}</span>
-					</Button>
-				{/each}
+				<Button
+					variant="outline"
+					disabled={isLoading || isGoogleLoading}
+					class="flex w-full items-center justify-center space-x-2 border-neutral-600 text-gray-200 transition-all duration-200 hover:bg-neutral-700/50 hover:text-white disabled:opacity-50"
+					aria-label="Sign in with Google"
+					on:click={handleGoogleSignIn}
+				>
+					{#if isGoogleLoading}
+						<Loader2 class="h-5 w-5 animate-spin" />
+						<span>Signing in...</span>
+					{:else}
+						<img
+							src="https://storage.googleapis.com/a1aa/image/29da2f80-2463-44b2-7766-8ab8f907eea7.jpg"
+							alt="Google"
+							class="h-5 w-5"
+						/>
+						<span>Continue with Google</span>
+					{/if}
+				</Button>
 			</div>
 		</CardContent>
 

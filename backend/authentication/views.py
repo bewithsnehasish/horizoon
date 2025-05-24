@@ -108,7 +108,6 @@ def google_login(request):
         return JsonResponse(
             {
                 "token": str(client.authToken),
-                "user_type": "Client",
                 "message": message,
             },
             status=status_code,
@@ -379,4 +378,3 @@ def get_renter_details(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Method not allowed"}, status=405)
-
