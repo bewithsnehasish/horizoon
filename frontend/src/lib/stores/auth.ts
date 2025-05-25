@@ -1,9 +1,12 @@
 import { writable } from 'svelte/store';
+import { signInWithGoogle, signOutGoogle } from '$lib/services/googleAuth';
 
 type User = {
 	token: string;
 	role: string;
 	email: string;
+	name?: string;
+	avatar?: string;
 };
 
 // Helper function for safe localStorage access
@@ -43,7 +46,15 @@ authStore.subscribe((user) => {
 	if (typeof window !== 'undefined') {
 		console.log('authStore updated - User:', user);
 		if (user) {
-			localStorage.setItem('authUser', JSON.stringify({ email: user.email, role: user.role }));
+			localStorage.setItem(
+				'authUser',
+				JSON.stringify({
+					email: user.email,
+					role: user.role,
+					name: user.name,
+					avatar: user.avatar
+				})
+			);
 			if (user.token) {
 				localStorage.setItem('authToken', user.token);
 				console.log('Setting authToken:', user.token);
@@ -64,7 +75,7 @@ export function getAuthToken(): string | null {
 	return token;
 }
 
-// Login function
+// Regular login function
 export async function login(email: string, password: string) {
 	try {
 		const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -98,6 +109,68 @@ export async function login(email: string, password: string) {
 	} catch (error) {
 		console.error('Login network error:', error);
 		return { success: false, error: 'Network error' };
+	}
+}
+
+// Google login function
+export async function loginWithGoogle() {
+	try {
+		console.log('Starting Google login process...');
+
+		// Get Google ID token from Firebase
+		const googleResult = await signInWithGoogle();
+
+		if (!googleResult.success || !googleResult.idToken) {
+			return {
+				success: false,
+				error: googleResult.error || 'Failed to authenticate with Google'
+			};
+		}
+
+		console.log('Google authentication successful, sending to backend...');
+
+		// Send Google ID token to your backend
+		const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+		const response = await fetch(`${API_BASE_URL}/authentication/google-login/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				id_token: googleResult.idToken,
+				email: googleResult.user?.email,
+				name: googleResult.user?.displayName || googleResult.user?.email?.split('@')[0]
+			})
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			return { success: false, error: errorData.error || 'Backend authentication failed' };
+		}
+
+		const data = await response.json();
+		console.log('Backend Google login response:', data);
+
+		if (!data.token) {
+			console.error('Google login response missing token:', data);
+			return { success: false, error: 'Invalid response from server: missing token' };
+		}
+
+		// Create user object with Google data
+		const user: User = {
+			token: data.token, // This is your backend's authToken
+			role: 'user',
+			email: googleResult.user?.email || '',
+			name: googleResult.user?.displayName || googleResult.user?.email?.split('@')[0],
+			avatar: googleResult.user?.photoURL
+		};
+
+		authStore.set(user);
+		return { success: true, error: null, message: data.message };
+	} catch (error: any) {
+		console.error('Google login error:', error);
+		return {
+			success: false,
+			error: error.message || 'Google authentication failed'
+		};
 	}
 }
 
@@ -138,7 +211,15 @@ export async function signup(username: string, email: string, password: string) 
 	}
 }
 
-// Logout function
-export function logout() {
-	authStore.set(null);
+// Enhanced logout function
+export async function logout() {
+	try {
+		// Sign out from Google if signed in
+		await signOutGoogle();
+	} catch (error) {
+		console.error('Error signing out from Google:', error);
+	} finally {
+		// Always clear the auth store
+		authStore.set(null);
+	}
 }

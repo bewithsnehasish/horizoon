@@ -11,9 +11,9 @@ const config = {
 	},
 	kit: {
 		adapter: adapter({
+			fallback: 'index.html',
 			pages: 'build',
 			assets: 'build',
-			fallback: null,
 			precompress: false,
 			strict: false
 		})

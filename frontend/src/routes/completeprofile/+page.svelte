@@ -3,25 +3,17 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import {
-		Select,
-		SelectContent,
-		SelectGroup,
-		SelectItem,
-		SelectTrigger,
-		SelectValue
-	} from '$lib/components/ui/select';
-	import { ArrowLeft, Loader2 } from 'lucide-svelte';
-	import { getAuthToken } from '$lib/stores/auth'; // Ensure this store and function are correctly set up
+	import { ArrowLeft, Loader2, XCircle, AlertTriangle } from 'lucide-svelte';
+	import { getAuthToken } from '$lib/stores/auth'; // Added clearAuthToken
 
 	let name: string = '';
 	let phoneNumber: string = '';
-	let selectedGender: string | undefined = undefined; // Make sure your Select component handles undefined initial value correctly or provide a default
+	let selectedGender: string | undefined = undefined;
 	let errorMessage: string = '';
 	let validationErrors: { [key: string]: string } = {};
 	let isLoading: boolean = false;
 
-	const genders = [
+	const genders: any[] = [
 		{ value: 'Male', label: 'Male' },
 		{ value: 'Female', label: 'Female' },
 		{ value: 'Other', label: 'Other' },
@@ -32,26 +24,34 @@
 		if (typeof window !== 'undefined' && window.history.length > 1) {
 			window.history.back();
 		} else {
-			goto('/'); // Fallback to home page
+			goto('/');
 		}
+	}
+
+	// Logout function to clear auth token and redirect
+	function logout() {
+		logout(); // Clear the auth token from store
+		goto('/intro');
 	}
 
 	// Validate form inputs
 	const validateForm = () => {
 		const errors: { [key: string]: string } = {};
 
+		// Name validation
 		if (!name || name.trim().length < 2) {
-			errors.name = 'Full name must be at least 2 characters.';
+			errors.name = 'Name must be at least 2 characters long';
 		}
 
-		// A more common international phone number regex, allowing optional '+' and digits
-		const phoneRegex = /^\+?[0-9]{7,15}$/; // Allows 7-15 digits after optional +
+		// Phone number validation
+		const phoneRegex = /^[0-9]{10}$/;
 		if (!phoneNumber || !phoneRegex.test(phoneNumber.trim())) {
-			errors.phone = 'Please enter a valid phone number (e.g., +1 123 456 7890).';
+			errors.phone = 'Please enter a valid 10-digit phone number';
 		}
 
+		// Gender validation
 		if (!selectedGender) {
-			errors.gender = 'Please select your gender.';
+			errors.gender = 'Please select your gender';
 		}
 
 		validationErrors = errors;
@@ -59,21 +59,26 @@
 	};
 
 	async function handleSubmitProfile() {
+		// Clear previous errors
 		errorMessage = '';
 		validationErrors = {};
 
+		// Validate form
 		if (!validateForm()) {
 			return;
 		}
 
-		const authToken = getAuthToken();
-		if (!authToken) {
-			errorMessage = 'Authentication required. Please log in again.';
-			goto('/login'); // Ensure you have a login route
+		// Get auth token
+		const userAuthToken = getAuthToken();
+		if (!userAuthToken) {
+			errorMessage = 'Authentication token not found. Please log in again.';
+			goto('/login');
 			return;
 		}
 
+		// Prepare payload
 		const payload = {
+			authToken: userAuthToken,
 			name: name.trim(),
 			phone: phoneNumber.trim(),
 			gender: selectedGender
@@ -81,13 +86,12 @@
 
 		isLoading = true;
 		try {
-			// Ensure VITE_API_BASE_URL is set in your .env file
-			const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'; // Provide a sensible fallback
+			const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Adjusted to match API endpoint
 			const response = await fetch(`${API_BASE_URL}/authentication/add-details/`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${authToken}` // Standard way to send token
+					Authorization: `Bearer ${userAuthToken}`
 				},
 				body: JSON.stringify(payload)
 			});
@@ -95,20 +99,33 @@
 			const data = await response.json();
 
 			if (response.ok && data.success) {
+				// Success case: { "success": true, "message": "Client details updated successfully" }
 				console.log('Profile submission successful:', data.message);
-				goto('/dashboard'); // Or desired next page, e.g., user dashboard
+				goto('/');
 			} else {
-				let specificError = 'Failed to submit profile. Please try again.';
-				if (data && data.message) {
-					specificError = data.message;
-				} else if (!response.ok) {
-					specificError = `Server error (${response.status}). Please try again later.`;
+				// Handle specific error cases
+				if (data.message === 'This Phone Number Already Registered') {
+					errorMessage = data.message;
+				} else if (
+					data.error ===
+					'Invalid authentication token provided: Client matching query does not exist.'
+				) {
+					errorMessage = 'Invalid authentication token. Logging out...';
+					logout();
+				} else {
+					// Generic error handling
+					let specificError = 'Failed to submit profile. Please try again.';
+					if (data && data.message) {
+						specificError = data.message;
+					} else if (!response.ok) {
+						specificError = `Server error (${response.status}). Please try again later.`;
+					}
+					errorMessage = specificError;
 				}
-				errorMessage = specificError;
 			}
 		} catch (error) {
 			console.error('Profile submission error:', error);
-			errorMessage = 'A network error occurred. Please check your connection and try again.';
+			errorMessage = 'An error occurred. Please try again.';
 		} finally {
 			isLoading = false;
 		}
@@ -116,11 +133,8 @@
 </script>
 
 <svelte:head>
-	<title>Complete Your Profile | Horizoon</title>
-	<meta
-		name="description"
-		content="Complete your profile to personalize your Horizoon car rental experience."
-	/>
+	<title>Complete Profile | Horizoon</title>
+	<meta name="description" content="Finalize your Horizoon profile to start your journey." />
 </svelte:head>
 
 <div class="font-quicksand flex min-h-screen flex-col bg-slate-950 text-gray-300 antialiased">
@@ -137,19 +151,21 @@
 	</header>
 
 	<main class="flex flex-grow flex-col items-center justify-center px-4 py-10 sm:px-6 sm:py-12">
-		<div
-			class="w-full max-w-md transform space-y-8 rounded-3xl bg-slate-900 p-6 shadow-2xl transition-all duration-500 ease-out sm:p-10"
-		>
+		<div class="w-full max-w-md space-y-8 rounded-3xl bg-slate-900 p-6 shadow-2xl sm:p-10">
 			<div class="text-center">
-				<h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Almost There!</h1>
+				<h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Just a Few Details</h1>
 				<p class="mt-2.5 text-sm leading-relaxed text-slate-400">
-					Tell us a bit more about yourself to personalize your <span
-						class="font-semibold text-teal-400">Horizoon</span
+					Complete your profile to enhance your <span class="font-semibold text-teal-400"
+						>Horizoon</span
 					> experience.
 				</p>
 			</div>
 
-			<form on:submit|preventDefault={handleSubmitProfile} class="space-y-6 sm:space-y-7">
+			<form
+				on:submit|preventDefault={handleSubmitProfile}
+				class="space-y-6 sm:space-y-7"
+				novalidate
+			>
 				<div>
 					<Label for="name" class="mb-2 block text-sm font-medium text-slate-300">Full Name</Label>
 					<Input
@@ -160,6 +176,7 @@
 						class="w-full rounded-xl border-slate-700/80 bg-slate-800/60 px-4 py-3.5 text-gray-100 placeholder-slate-500
 							   transition-all duration-150 focus:border-teal-500 focus:bg-slate-800 focus:ring-2 focus:ring-teal-500"
 						required
+						aria-invalid={!!validationErrors.name}
 						aria-describedby={validationErrors.name ? 'name-error' : undefined}
 					/>
 					{#if validationErrors.name}
@@ -172,16 +189,20 @@
 
 				<div>
 					<Label for="phone" class="mb-2 block text-sm font-medium text-slate-300"
-						>Phone Number</Label
+						>Phone Number (10-digit)</Label
 					>
 					<Input
 						id="phone"
 						type="tel"
+						inputmode="numeric"
+						maxlength="10"
+						pattern="[0-9]{10}"
 						bind:value={phoneNumber}
-						placeholder="e.g., +1 123 456 7890"
+						placeholder="e.g., 9876543210"
 						class="w-full rounded-xl border-slate-700/80 bg-slate-800/60 px-4 py-3.5 text-gray-100 placeholder-slate-500
 							   transition-all duration-150 focus:border-teal-500 focus:bg-slate-800 focus:ring-2 focus:ring-teal-500"
 						required
+						aria-invalid={!!validationErrors.phone}
 						aria-describedby={validationErrors.phone ? 'phone-error' : undefined}
 					/>
 					{#if validationErrors.phone}
@@ -194,30 +215,18 @@
 
 				<div>
 					<Label for="gender" class="mb-2 block text-sm font-medium text-slate-300">Gender</Label>
-					<Select bind:value={selectedGender}>
-						<SelectTrigger
-							id="gender"
-							class="w-full rounded-xl border-slate-700/80 bg-slate-800/60 px-4 py-3.5 text-gray-100
-								   transition-all duration-150 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 data-[placeholder]:text-slate-500"
-							aria-describedby={validationErrors.gender ? 'gender-error' : undefined}
-						>
-							<SelectValue placeholder="Choose your gender" />
-						</SelectTrigger>
-						<SelectContent
-							class="z-50 rounded-xl border-slate-700 bg-slate-800 p-1.5 text-gray-200 shadow-xl"
-						>
-							<SelectGroup>
-								{#each genders as gender (gender.value)}
-									<SelectItem
-										value={gender.value}
-										class="rounded-lg px-3 py-2 hover:bg-teal-500/20 focus:bg-teal-500/30 data-[state=checked]:bg-teal-600/25 data-[state=checked]:text-teal-300"
-									>
-										{gender.label}
-									</SelectItem>
-								{/each}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					<select
+						id="gender"
+						bind:value={selectedGender}
+						class="w-full rounded-xl border border-slate-700/80 bg-slate-800/60 px-4 py-3.5 text-gray-100 transition-all duration-150 focus:border-teal-500 focus:ring-2 focus:ring-teal-500"
+						aria-invalid={!!validationErrors.gender}
+						aria-describedby={validationErrors.gender ? 'gender-error' : undefined}
+					>
+						<option value="" disabled selected>Select your gender</option>
+						{#each genders as gender (gender.value)}
+							<option value={gender.value}>{gender.label}</option>
+						{/each}
+					</select>
 					{#if validationErrors.gender}
 						<p id="gender-error" class="mt-2 flex items-center text-xs text-red-400">
 							<XCircle class="mr-1.5 h-3.5 w-3.5 shrink-0" />
@@ -240,39 +249,36 @@
 					disabled={isLoading}
 					class="!mt-10 w-full transform rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600
 						   px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all duration-300
-						   ease-out hover:scale-105 hover:from-teal-600
+						   ease-out hover:scale-[1.03] hover:from-teal-600
 						   hover:to-cyan-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/50 active:scale-100 disabled:cursor-not-allowed
 						   disabled:bg-slate-600 disabled:from-slate-600 disabled:to-slate-500 disabled:opacity-60 disabled:hover:scale-100 sm:py-4"
 				>
 					{#if isLoading}
-						<Loader2 class="mr-2.5 inline h-5 w-5 animate-spin" />
-						<span>Saving Profile...</span>
+						<Loader2 class="mr-2.5 inline h-5 w-5 animate-spin align-middle" />
+						<span class="align-middle">Saving...</span>
 					{:else}
-						Complete Profile & Drive
+						<span class="align-middle">Complete Profile</span>
 					{/if}
 				</Button>
 			</form>
 		</div>
 	</main>
 	<footer class="py-8 text-center text-xs text-slate-500">
-		© {new Date().getFullYear()} Horizoon Car Rentals. Drive Your Dreams.
+		© {new Date().getFullYear()} Horizoon. Your Adventure Awaits.
 	</footer>
 </div>
 
 <style>
-	:global(.font-quicksand) {
+	:global(body.font-quicksand) {
 		font-family: 'Quicksand', sans-serif;
 	}
-	:global(.backdrop-blur-lg) {
-		/* If not already globally defined by Tailwind */
-		backdrop-filter: blur(12px);
+	.font-quicksand {
+		font-family: 'Quicksand', sans-serif;
 	}
 
-	/* For Firefox to remove number input spinners - if you use type=number specifically */
 	input[type='number'] {
 		-moz-appearance: textfield;
 	}
-	/* For Chrome, Safari, Edge, Opera - if you use type=number specifically */
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
 		-webkit-appearance: none;
