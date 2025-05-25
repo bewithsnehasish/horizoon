@@ -3,8 +3,12 @@
 
 {% block extrahead %}
   {{ block.super }}
-
   <script src="{% static 'admin/js/prefetch.js' %}"></script>
+  <style>
+    html {
+      transition: opacity 0.3s ease;
+    }
+  </style>
 {% endblock %}
 
 
