@@ -9,6 +9,38 @@ const config: CapacitorConfig = {
 	},
 	// Add this for better web compatibility
 	plugins: {
+		CapacitorAssets: {
+			iconPath: 'static/logo.png',
+
+			// Skip splash screen generation
+			splashPath: undefined,
+
+			// Optional: Disable splash screen generation completely
+			android: {
+				splashPath: undefined
+			},
+			ios: {
+				splashPath: undefined
+			}
+		},
+
+		// Disable splash screen plugin if you have it
+		SplashScreen: {
+			launchShowDuration: 0,
+			launchAutoHide: true,
+			backgroundColor: '#000000',
+			androidSplashResourceName: 'splash',
+			androidScaleType: 'CENTER_CROP',
+			showSpinner: false,
+			androidSpinnerStyle: 'large',
+			iosSpinnerStyle: 'small',
+			spinnerColor: '#999999',
+			splashFullScreen: true,
+			splashImmersive: true,
+			layoutName: 'launch_splash',
+			useDialog: true
+		},
+
 		Geolocation: {
 			permissions: {
 				location: 'always'

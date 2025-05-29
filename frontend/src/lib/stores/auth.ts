@@ -137,7 +137,7 @@ export async function loginWithGoogle() {
 			body: JSON.stringify({
 				id_token: googleResult.idToken,
 				email: googleResult.user?.email,
-				name: googleResult.user?.displayName || googleResult.user?.email?.split('@')[0]
+				username: googleResult.user?.displayName || googleResult.user?.email?.split('@')[0]
 			})
 		});
 

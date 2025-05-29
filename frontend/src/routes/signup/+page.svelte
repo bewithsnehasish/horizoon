@@ -1,8 +1,7 @@
-<!-- src/routes/signup/+page.svelte -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Eye, EyeOff } from 'lucide-svelte';
-	import { signup } from '$lib/stores/auth';
+	import { Eye, EyeOff, Loader2 } from 'lucide-svelte';
+	import { signup, loginWithGoogle } from '$lib/stores/auth';
 
 	// Shadcn-svelte components
 	import { Button } from '$lib/components/ui/button';
@@ -17,14 +16,33 @@
 		CardTitle
 	} from '$lib/components/ui/card';
 
-	let showPassword = false;
-	let username = '';
-	let email = '';
-	let password = '';
-	let confirmPassword = '';
-	let errorMessage = '';
-	let validationErrors: { [key: string]: string } = {};
-	let isLoading = false;
+	// SVELTE 5: Using $state for all reactive state
+	let showPassword = $state(false);
+	let showConfirmPassword = $state(false);
+	let username = $state('');
+	let email = $state('');
+	let password = $state('');
+	let confirmPassword = $state('');
+	let errorMessage = $state('');
+	let validationErrors = $state<{ [key: string]: string }>({});
+	let isLoading = $state(false);
+	let isGoogleLoading = $state(false);
+
+	// SVELTE 5: Reactive computations using $derived
+	const isFormValid = $derived(() => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return (
+			username.length >= 3 &&
+			email &&
+			emailRegex.test(email) &&
+			password.length >= 6 &&
+			password === confirmPassword
+		);
+	});
+
+	const passwordsMatch = $derived(() => {
+		return password === confirmPassword || confirmPassword === '';
+	});
 
 	// Validate form inputs
 	const validateForm = () => {
@@ -55,7 +73,7 @@
 		return Object.keys(errors).length === 0;
 	};
 
-	// Handle signup form submission
+	// Handle regular signup form submission
 	const handleSignup = async () => {
 		// Clear previous errors
 		errorMessage = '';
@@ -82,21 +100,45 @@
 		}
 	};
 
+	// Handle Google Sign-Up
+	const handleGoogleSignUp = async () => {
+		errorMessage = '';
+		isGoogleLoading = true;
+
+		try {
+			console.log('Initiating Google sign-up...');
+			const result = await loginWithGoogle();
+
+			if (result.success) {
+				console.log('Google sign-up successful, redirecting...');
+				goto('/completeprofile');
+			} else {
+				console.error('Google sign-up failed:', result.error);
+				errorMessage = result.error || 'Google sign-up failed';
+			}
+		} catch (error) {
+			console.error('Google sign-up error:', error);
+			errorMessage = 'An error occurred during Google sign-up';
+		} finally {
+			isGoogleLoading = false;
+		}
+	};
+
+	// SVELTE 5: Effects using $effect
+	$effect(() => {
+		// Clear validation errors when user types
+		if (username || email || password || confirmPassword) {
+			validationErrors = {};
+			errorMessage = '';
+		}
+	});
+
 	const backgroundImageUrl =
 		'https://images.unsplash.com/photo-1685729847171-7c7e631c2359?q=80&w=2126&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-
-	// Social providers for signup (consistent with login page)
-	const socialProviders = [
-		{
-			label: 'Google',
-			iconUrl: 'https://storage.googleapis.com/a1aa/image/29da2f80-2463-44b2-7766-8ab8f907eea7.jpg',
-			href: '/auth/google'
-		}
-	];
 </script>
 
 <svelte:head>
-	<title>Sign Up</title>
+	<title>Sign Up - Horizoon</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link
@@ -169,7 +211,7 @@
 							variant="ghost"
 							size="icon"
 							class="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:bg-transparent hover:text-gray-200"
-							on:click={() => (showPassword = !showPassword)}
+							onclick={() => (showPassword = !showPassword)}
 							aria-label={showPassword ? 'Hide password' : 'Show password'}
 						>
 							{#if showPassword}
@@ -188,21 +230,23 @@
 					<div class="relative mt-1">
 						<Input
 							id="confirm-password"
-							type={showPassword ? 'text' : 'password'}
+							type={showConfirmPassword ? 'text' : 'password'}
 							bind:value={confirmPassword}
 							placeholder="••••••••"
 							required
-							class="border-neutral-600 bg-neutral-800/50 text-white placeholder:text-neutral-400 focus:border-primary"
+							class="border-neutral-600 bg-neutral-800/50 text-white placeholder:text-neutral-400 focus:border-primary {!passwordsMatch
+								? 'border-red-500'
+								: ''}"
 						/>
 						<Button
 							type="button"
 							variant="ghost"
 							size="icon"
 							class="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:bg-transparent hover:text-gray-200"
-							on:click={() => (showPassword = !showPassword)}
-							aria-label={showPassword ? 'Hide password' : 'Show password'}
+							onclick={() => (showConfirmPassword = !showConfirmPassword)}
+							aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
 						>
-							{#if showPassword}
+							{#if showConfirmPassword}
 								<EyeOff class="h-5 w-5" />
 							{:else}
 								<Eye class="h-5 w-5" />
@@ -211,6 +255,8 @@
 					</div>
 					{#if validationErrors.confirmPassword}
 						<p class="mt-1 text-sm text-red-500">{validationErrors.confirmPassword}</p>
+					{:else if !passwordsMatch}
+						<p class="mt-1 text-sm text-yellow-500">Passwords do not match</p>
 					{/if}
 				</div>
 				{#if errorMessage}
@@ -218,11 +264,14 @@
 				{/if}
 				<Button
 					type="submit"
-					disabled={isLoading}
-					class="!mt-6 w-full rounded-md bg-blue-600 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					disabled={isLoading || isGoogleLoading || !isFormValid}
+					class="!mt-6 w-full rounded-md bg-blue-600 py-2 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
 				>
 					{#if isLoading}
-						<span class="animate-pulse">Signing Up...</span>
+						<div class="flex items-center justify-center gap-2">
+							<Loader2 class="h-4 w-4 animate-spin" />
+							<span>Signing Up...</span>
+						</div>
 					{:else}
 						Sign Up
 					{/if}
@@ -239,19 +288,27 @@
 				</div>
 			</div>
 
-			<!-- Social Signup Buttons -->
+			<!-- Enhanced Google Signup Button -->
 			<div class="space-y-3">
-				{#each socialProviders as provider (provider.label)}
-					<Button
-						variant="outline"
-						class="flex w-full items-center justify-center space-x-2 border-neutral-600 text-gray-200 hover:bg-neutral-700/50 hover:text-white"
-						aria-label={`Sign up with ${provider.label}`}
-						on:click={() => goto(provider.href)}
-					>
-						<img src={provider.iconUrl} alt="" class="h-5 w-5" />
-						<span>{provider.label}</span>
-					</Button>
-				{/each}
+				<Button
+					variant="outline"
+					disabled={isLoading || isGoogleLoading}
+					class="flex w-full items-center justify-center space-x-2 border-neutral-600 text-gray-200 transition-all duration-200 hover:bg-neutral-700/50 hover:text-white disabled:opacity-50"
+					aria-label="Sign up with Google"
+					onclick={handleGoogleSignUp}
+				>
+					{#if isGoogleLoading}
+						<Loader2 class="h-5 w-5 animate-spin" />
+						<span>Signing up...</span>
+					{:else}
+						<img
+							src="https://storage.googleapis.com/a1aa/image/29da2f80-2463-44b2-7766-8ab8f907eea7.jpg"
+							alt="Google"
+							class="h-5 w-5"
+						/>
+						<span>Continue with Google</span>
+					{/if}
+				</Button>
 			</div>
 		</CardContent>
 
