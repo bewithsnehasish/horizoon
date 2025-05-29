@@ -1,6 +1,6 @@
 from django.contrib import admin
 from authentication.models import Renter, Client, ClientDetails
-
+from django.views.decorators.cache import cache_page
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):

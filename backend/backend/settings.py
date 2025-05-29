@@ -43,8 +43,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    'django.middleware.common.CommonMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -171,3 +171,6 @@ WHITENOISE_MANIFEST_STRICT = False
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+SECURE_CONTENT_TYPE_NOSNIFF = False
+X_FRAME_OPTIONS = 'SAMEORIGIN'
